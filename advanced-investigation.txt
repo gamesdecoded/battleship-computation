@@ -1,0 +1,293 @@
+ADVANCED-BEYOND-BPK INVESTIGATION — BATTLESHIP COMPUTATION TEST
+humandecoded, Battleship computation test
+Date of runs: 2026-10-29 (PKT, evening)
+Status: BONUS / ADVANCED arms only. These results do NOT replace the locked
+primary production numbers in results.json and numbers-log.txt.
+Primary production (locked, 20,000 paired fleets, seed 20291029):
+  Density group-all placement-count: 45.17 mean, 45.0 median, 95% CI +-0.12.
+  Parity+Target (human-usable rule): 61.34 +-0.12.
+  Hunt+Target: 66.36 +-0.18. Random analytic baseline: 95.39 shots.
+BPK comparison throughout is UNPAIRED and flagged: BPK's fleets, seeds and exact
+density formula are not public, and BPK's figures are rounded with no CI
+(about 45 for density, about 63 for hunt-target). No "beats BPK" claim is made
+on an unpaired level comparison alone.
+
+METHOD
+- Starting point: production engine engine.py (same definitions as
+  definition-sheet.txt: 10x10, labelled fleet 5-4-3-3-2, touching allowed,
+  uniform random legal placements, group-all marginal placement-count density,
+  sinking-aware, parity colour (row+col) even, target stack LIFO neighbours
+  up/right/down/left with line extensions pushed after side neighbours so they
+  pop first, tie-break centre distance then row-major index).
+- Advanced search arms: 3,000 paired fleets, fresh seed 20291101 (distinct from
+  production seed 20291029 and benchmark seed 20261029), same fleets across all
+  advanced search arms, so paired differences are valid within this sample.
+  On these 3,000 fleets the density reference itself is 44.90 mean, 44.0 median,
+  CI +-0.31 — slightly below the production 45.17 because it is a different
+  3,000-fleet sample. Paired differences below are vs this 3,000-fleet density
+  reference, which is the honest comparison; absolute means are also given.
+- Placement x search game: 2,000 placements per strategy, same placements
+  across searchers within each strategy (paired across searchers, unpaired
+  across strategies). Mix runs: 2,000 placements, alternating strategies.
+- CI method: mean +- 1.96 x SD / sqrt(n); paired differences use the same
+  fleets. "Material" means a CI-separated gain of at least several shots, not
+  a fraction of a shot — a 0.3-0.6 shot gain on 45 shots is real but not a
+  headline advance.
+- Sunk detection in all advanced arms: true-ship sunk announcement, as in
+  production (see production deviation 1 — the definition sheet's
+  "inferred from group size" phrasing must be corrected to sunk-announcement
+  wording before scripting).
+
+========================================================================
+CANDIDATE 1 — HYBRID: DENSITY HUNT + EXPLICIT TARGET STACK
+========================================================================
+Idea: use density to find the first hit, then switch to the locked target
+stack instead of letting density keep choosing every shot, with parity
+switching after the smallest ship is sunk (spacing to every 3rd square when
+only 3+ length ships remain, i.e. the mod-3 pattern).
+Result, 3,000 paired fleets:
+  Density (reference):        44.90 mean, 44.0 median, CI +-0.31
+  Hybrid density+stack:       56.63 mean, 57.0 median, CI +-0.28
+    paired diff vs density:   +11.73 shots, CI +-0.35  (WORSE)
+  Hybrid+mod3:                56.92 mean, 57.0 median, CI +-0.28
+    paired diff vs density:   +12.02 shots, CI +-0.36  (WORSE)
+Grade: BEHIND BPK / BEHIND density. Dead end.
+Why it fails (measured, not guessed): density's advantage is not only in the
+hunt. After a hit, density re-scores every square with the hit information and
+skips neighbours that cannot belong to a remaining ship, while a dumb stack
+spends shots probing all four neighbours and side branches. Replacing density
+targeting with a stack throws away about 12 shots. This is consistent with
+production: parity+target (61.34) and hunt+target (66.36) are far behind
+density (45.17) even though their hunt is weaker too.
+Script wording: do NOT present hybrid as an improvement. If mentioned at all,
+it is a measured dead end: "we tried handing the hunt to the stack — it cost
+12 shots, so the computer keeps choosing every shot."
+
+========================================================================
+CANDIDATE 2 — SHIP-LENGTH-AWARE DENSITY REFINEMENTS (each tested separately)
+========================================================================
+All on the same 3,000 paired fleets, diffs vs density 44.90 in this sample.
+
+2a. Mod-3 density (no stack): density hunt restricted to squares with
+    (row+col) divisible by 3 once only 3+ length ships remain, to guarantee
+    hitting every remaining ship's segment.
+    Mean 45.37, median 45.0, CI +-0.31; paired diff +0.47 +-0.14.
+    Grade: BEHIND (small but CI-separated worse). Density already accounts
+    for remaining lengths; forcing the spacing pattern wastes shots.
+    Dead end as a headline refinement.
+
+2b. Normalised density: per-ship score = placements of that ship covering the
+    square divided by that ship's total valid placements, summed over
+    remaining ships (each remaining ship gets equal weight, instead of longer
+    ships dominating by placement count).
+    Mean 44.62, median 44.0, CI +-0.31; paired diff -0.27 +-0.18.
+    Grade: AT BPK, tiny gain. CI excludes zero, but 0.27 shots is 0.6% —
+    not material, and not a headline. Keep as a footnote refinement only.
+
+2c. Length-weighted density: placements weighted by ship length L.
+    Mean 44.88, median 44.0, CI +-0.32; paired diff -0.01 +-0.14.
+    Grade: AT BPK, no effect. Dead end — length weighting moves nothing
+    because the marginal count already scales with length.
+
+2d. Line-bonus density: after two or more collinear unsunk hits, add a large
+    bonus to the two line-extension squares (the squares continuing the line
+    at either end), so density chooses the line continuation first, while
+    still ranking extensions by placement count. This integrates line
+    following INTO density scoring, not as a separate stack.
+    Mean 44.33, median 44.0, CI +-0.31; paired diff -0.57 +-0.13.
+    Grade: AT BPK, small but real. This is the best search refinement found:
+    about 0.6 shots, about 1.3%, CI-separated. Against BPK's rounded about 45
+    (unpaired, flagged) it is 0.67 shots below, but BPK's figure has no CI
+    and is rounded, so this CANNOT be claimed as "beats BPK". It is a
+    refinement of density, not a new strategy class.
+
+2e. Normalised + line-bonus combined:
+    Mean 44.43, median 44.0, CI +-0.32; paired diff -0.47 +-0.19.
+    Grade: AT BPK, gains do not stack. Line-bonus alone (2d) remains best.
+    Do not present the combination as better than line-bonus alone.
+
+Overall candidate 2 verdict: NO search refinement beats BPK on shots by a
+material margin. The best is line-bonus at about half a shot. That is worth
+one honest sentence in a script, not a headline claim.
+
+========================================================================
+CANDIDATE 3 — PLACEMENT x SEARCH GAME (the counter-strategy loop)
+========================================================================
+BPK did placement as a one-sided recap. Production already showed placement
+is opponent-dependent (10,000 per strategy): vs density, edge +6.87 (best),
+corner +4.05, spread +1.35, interior -7.57 (worst); vs parity, spread +6.29
+(best), edge -0.30 (wash), corner +0.01 (no difference), interior -1.76.
+This investigation extends that to a counter loop, 2,000 placements per
+strategy, same placements across searchers. Searchers: density, parity+target,
+hunt+target, edge-aware density (density restricted per ship to edge-touching
+placements only — the searcher that knows the hider hides on edges),
+centre-first+target (human-model sensitivity, see candidate 4).
+
+Table: mean shots to sink (higher = better hiding). CI about +-0.2 to +-0.6.
+  Placement   vs density  vs parity  vs hunt  vs edge-aware  vs centre-first
+  P-random        44.92      61.60    66.02        72.23           73.42
+  P-edge          52.02      60.96    66.34        32.97           85.03
+  P-corner        49.32      61.58    66.64        71.34           83.13
+  P-interior      37.67      59.64    62.81        76.25           54.69
+  P-spread        46.27      67.55    74.26        70.65           82.09
+These reproduce production's pattern on a fresh sample (edge vs density
+52.02 here vs 51.98 in production; spread vs parity 67.55 vs 67.57), which
+validates the game table.
+
+The counter loop, measured:
+  Step 1 — hider plays edge (best vs unaware density: 52.02).
+  Step 2 — seeker counters with edge-aware density: edge collapses to 32.97,
+           a 19.05-shot reversal, far BELOW random (44.92). The edge rule,
+           once known, is worse than hiding at random.
+  Step 3 — hider's best response among tested pure strategies against the
+           tested searcher set is then corner: its worst case across
+           density/parity/hunt/edge-aware is density at 49.32 (edge-aware
+           does not hurt corner, 71.34, because corner fleets are mostly not
+           all-edge). But a corner-aware searcher was NOT tested, and by the
+           same logic it would be expected to cut corner too. The loop does
+           NOT converge to a pure strategy in the tested set.
+  Step 4 — mixing hiding rules improves the worst case within the tested
+           searcher set (2,000 placements, alternating strategies):
+             edge/corner 50/50: vs density 50.72 +-0.35, vs edge-aware
+               52.44 +-0.94, vs parity 61.22 +-0.36. Worst case 50.72 —
+               better than pure corner's 49.32 and pure random's 44.92.
+             edge/spread 50/50: worst case 49.15 (density).
+             corner/spread 50/50: worst case 47.65 (density).
+           The edge/corner mix is the best maximin measured. BUT a bespoke
+           mixed counter-searcher (e.g. mixing edge-aware and corner-aware
+           searchers) was NOT tested, so this is NOT a proven equilibrium.
+           Do NOT claim "unexploitable placement" or "equilibrium proven".
+           The honest claim is weaker and still real: mixing rules raises the
+           worst case against every counter-searcher we tested, while every
+           single rule we tested has a counter that kills it.
+
+Grade: ADVANCED BEYOND BPK — not on shots, but on scope. BPK did not show
+this loop. The game itself is the advance: a one-sided placement recap
+becomes a two-player loop with a measured counter, a measured collapse, and
+a measured mixed-hiding answer. This is the strongest scriptable advanced
+angle in this investigation.
+Honest wording (use this shape, not a stronger one):
+  "Every hiding rule has a counter-search, and we measured the counter.
+   Hide on the edges and the computer finds you in 33 shots once it knows.
+   The best defence we measured is not one rule — it is randomising
+   between two rules, which holds about 51 shots against every searcher
+   we tested."
+Do NOT say: "we found the unexploitable placement" / "the equilibrium" /
+"the perfect hiding strategy". Those are not measured.
+
+========================================================================
+CANDIDATE 4 — HUMAN PLACEMENT / HUMAN SEARCH MODEL
+========================================================================
+Sources searched (web-guide searches, 2026-10-29): no citable, clean human
+placement-frequency dataset was found. What exists is weak and must not be
+presented as data:
+  - A general visual-attention claim (eyes about 3x more likely to gravitate
+    to the upper middle) — not a Battleship dataset; applying it to fleets
+    is inference, not measurement.
+  - A blog-style citation of an unnamed cognitive scientist (players avoid
+    centre and corners) — no verifiable dataset.
+  - Anecdotal tips (columns 1, 5, 10 most guessed; hard-to-say coordinates
+    best hiding) — anecdote, not data.
+  - One small real-games collection (83 two-person games; heat maps favouring
+    rows B and I, columns 2, 4, 9; size-2 ships often in corners) — single
+    group, tiny sample, not a general frequency table.
+  - One survey (600+ online submissions after a Reddit link; corners
+    populated about a quarter of the time in two corners) — the author
+    himself flagged flaws: possible board flipping, duplicates not
+    eliminated, click-to-rotate interface bias, respondents possibly
+    messing with results. Do NOT use as a clean dataset.
+  - One survey-style source (most popular I row and 9 column, C9/I8/I9,
+    carrier more likely in middle regions) — sample size and source
+    quality not established from the snippet. Do NOT treat as verified.
+Grade: UNPROVEN as measured human data. Do NOT invent human frequencies.
+
+Stated sensitivity model instead (explicit assumptions, labelled as model):
+  Centre-first search: hunt squares in centre-distance order, then the
+  locked target stack after a hit. This is a MODEL of a centre-biased human,
+  not a measured human.
+  On random fleets, 3,000 paired fleets: centre-first+target 72.93 mean,
+  75.0 median, CI +-0.48; paired diff vs density +28.03 +-0.47. A
+  centre-biased searcher is about 28 shots behind the computer.
+  Against placements (2,000 per strategy, game table above), centre-first
+  is worst against edge (85.03) and corner (83.13) and spread (82.09),
+  and best (relatively) against interior (54.69). So UNDER THIS MODEL the
+  answer flips: hide on the edges, not the centre — the opposite of the
+  naive "hide where they look first" intuition, because a centre-first
+  searcher spends its early shots in the centre and reaches the edges last.
+  That flip is scriptable ONLY with the model label attached:
+  "If your opponent searches from the centre out — a stated model, not a
+  measured habit — then edge hiding survives about 85 shots in our model."
+  It must not be presented as "humans search centre-first" as a fact.
+
+========================================================================
+CANDIDATE 5 — JOINT EXACT DENSITY ON A LIMITED, HONEST SCOPE
+========================================================================
+Joint density = probability a square is occupied given all hits/misses,
+counting whole fleets jointly, not per-ship marginals. Small-board proxy
+from feasibility (7x7, fleet [4,3,2], 205,692 labelled fleets enumerated,
+50 paired fleets): joint exact 22.42 mean, marginal group-all 21.86 mean,
+paired diff marginal-joint -0.56, CI +-1.17 — statistically indistinguishable
+from zero, point estimate slightly in marginal's favour. On the only board
+where joint can be measured exactly, joint does NOT beat marginal.
+At full 10x10 scale, joint is infeasible as a tournament strategy: one
+component of one joint candidate count took 1.44 seconds in compiled C
+(232,207,034 completions); a full candidate is of order tens of seconds, one
+joint shot of order tens of minutes, one game of order tens of hours (all
+extrapolation from the measured component, stated as extrapolation, not
+measurement). A 10,000-fleet joint tournament is out of the question, and
+even a small-sample joint-vs-marginal paired test at 10x10 would need a
+fundamentally smarter counting method proven by prototype first.
+Grade: UNPROVEN as a gain, INFEASIBLE at scale. Dead end as a tournament
+upgrade. Do NOT claim joint as an advance unless a future paired test shows
+a CI-separated gain — the only paired evidence available shows no gain.
+
+========================================================================
+FINAL RECOMMENDATION
+========================================================================
+NONE of the tested candidates beats BPK on shots by a material margin.
+Say that plainly:
+  - Best search refinement (line-bonus density): 44.33 on 3,000 fleets,
+    -0.57 +-0.13 vs density in the same sample — real, small, not a headline.
+  - Hybrid density+stack: 11.73 shots WORSE. Mod-3 density: 0.47 worse.
+    Length weighting: no effect. Joint: no measured gain, infeasible.
+  - Density itself remains AT BPK (production 45.17 vs BPK about 45,
+    unpaired, BPK rounded with no CI).
+
+The strongest honest "advanced than BPK" angle is NOT a shots win. It is
+candidate 3, the placement x search game, with candidate 2d as a supporting
+refinement and candidate 4 as a labelled sensitivity beat:
+  1. Keep the locked primary tournament and placement beat unchanged.
+  2. Add the game beat: edge hiding -> edge-aware counter-search (52.02 to
+     32.97) -> mixed edge/corner hiding (worst case 50.72 vs tested
+     searchers) -> honest limit (mixed counter-searcher not tested, no
+     equilibrium claimed).
+  3. Add one line-bonus sentence: following the line after two hits in a
+     row saves about half a shot over plain density in our paired test.
+  4. Add the centre-model beat ONLY with the model label: if the opponent
+     searches centre-first (model, not measured habit), edge hiding
+     survives about 85 shots.
+Recommended headline wording for the advanced claim (do not strengthen):
+  "BPK showed you the best guess. We played the whole game — every hiding
+   rule, its counter-search, and what survives when the opponent knows
+   your rule."
+Recommended wording that must NOT be used:
+  "Our strategy beats BPK" / "faster than BPK's 45" / "the unexploitable
+   placement" / "the perfect hiding strategy" / "humans hide ships here"
+   (as a measured fact).
+
+What remains unverified / not done:
+  - A corner-aware searcher and a mixed counter-searcher were not tested;
+    the equilibrium claim is therefore unproven, not merely unmeasured.
+  - Joint density at 10x10 was not run as a paired game test (infeasible
+    without a smarter counting prototype); the only joint evidence is the
+    small-board proxy.
+  - No clean human placement-frequency dataset was found; candidate 4
+    stays a stated model.
+  - All advanced search arms are on 3,000 fleets (not production's 20,000);
+    their paired differences are CI-separated where claimed, but absolute
+    means will shift slightly on a larger sample. If line-bonus is to be
+    quoted in a script, re-run it on the production fleet set or quote the
+    paired difference (-0.57) rather than the absolute 44.33.
+  - Primary numbers in results.json / numbers-log.txt were not changed.
+    Advanced arms are bonus only and must stay labelled as such in any
+    script, so the audience can tell the tournament from the extras.

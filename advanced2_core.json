@@ -1,0 +1,119 @@
+{
+  "Density": {
+    "mean": 45.287,
+    "median": 45.0,
+    "sd": 8.828926755230015,
+    "ci_hw": 0.3159390863701576,
+    "paired_vs_density": null
+  },
+  "LineBonusDensity": {
+    "mean": 44.79,
+    "median": 44.0,
+    "sd": 8.96262663650609,
+    "ci_hw": 0.3207234751763213,
+    "paired_vs_density": [
+      -0.497,
+      0.12367155975983785
+    ]
+  },
+  "Entropy": {
+    "mean": 74.699,
+    "median": 80.0,
+    "sd": 19.792514920603047,
+    "ci_hw": 0.7082660502624282,
+    "paired_vs_density": [
+      29.412,
+      0.6982637428422415
+    ]
+  },
+  "BlendDensityEntropy": {
+    "mean": 45.41766666666667,
+    "median": 45.0,
+    "sd": 8.728418126053347,
+    "ci_hw": 0.3123424312664574,
+    "paired_vs_density": [
+      0.13066666666666665,
+      0.2063023657224659
+    ]
+  },
+  "BlendEntropyLine": {
+    "mean": 45.33233333333333,
+    "median": 45.0,
+    "sd": 8.757708245128468,
+    "ci_hw": 0.31339056471651516,
+    "paired_vs_density": [
+      0.04533333333333334,
+      0.19946139726842924
+    ]
+  },
+  "Human_ParityTarget_repro": {
+    "mean": 61.483333333333334,
+    "median": 63.0,
+    "sd": 8.681062291163252,
+    "ci_hw": 0.3106478244785361,
+    "paired_vs_density": [
+      16.19633333333333,
+      0.4452159413886038
+    ]
+  },
+  "Human_ParityTarget_clearAdj": {
+    "mean": 57.655,
+    "median": 58.0,
+    "sd": 10.272024134833838,
+    "ci_hw": 0.3675796628858841,
+    "paired_vs_density": [
+      12.368,
+      0.47890930375970897
+    ]
+  },
+  "Human_CentreParity_clearAdj": {
+    "mean": 56.769,
+    "median": 56.0,
+    "sd": 9.785817615754084,
+    "ci_hw": 0.35018098604962233,
+    "paired_vs_density": [
+      11.482,
+      0.40159277774634317
+    ]
+  },
+  "Human_SpacingRandom_clearAdj": {
+    "mean": 57.409,
+    "median": 57.0,
+    "sd": 10.603577900317234,
+    "ci_hw": 0.3794441620094449,
+    "paired_vs_density": [
+      12.122,
+      0.49160894944325617
+    ]
+  },
+  "Human_SpacingRandom_clearAdj_lineOnly": {
+    "mean": 55.522,
+    "median": 55.0,
+    "sd": 11.979678079799635,
+    "ci_hw": 0.42868727450915367,
+    "paired_vs_density": [
+      10.235,
+      0.5289869579283883
+    ]
+  },
+  "Human_SpacingCentre_clearAdj_lineOnly": {
+    "mean": 55.389,
+    "median": 54.0,
+    "sd": 11.330069247642994,
+    "ci_hw": 0.40544132099527075,
+    "paired_vs_density": [
+      10.102,
+      0.44353703180939047
+    ]
+  },
+  "Human_CentreParity_clearAdj_lineOnly": {
+    "mean": 54.605333333333334,
+    "median": 54.0,
+    "sd": 10.114527808049939,
+    "ci_hw": 0.3619437292135059,
+    "paired_vs_density": [
+      9.318333333333333,
+      0.4052664380440328
+    ]
+  }
+}

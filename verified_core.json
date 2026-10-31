@@ -1,0 +1,379 @@
+{
+  "seed": 20291110,
+  "n_paired_fleets": 10000,
+  "tournament": {
+    "Density-group-all": {
+      "n": 10000,
+      "mean": 44.9672,
+      "median": 44.0,
+      "sd": 8.821219051273756,
+      "ci_half_width": 0.1728958934049656,
+      "ci_low": 44.794304106595035,
+      "ci_high": 45.14009589340496
+    },
+    "LineBonusDensity": {
+      "n": 10000,
+      "mean": 44.4999,
+      "median": 44.0,
+      "sd": 8.932747583355235,
+      "ci_half_width": 0.17508185263376264,
+      "ci_low": 44.32481814736624,
+      "ci_high": 44.674981852633756
+    },
+    "Parity+Target-production": {
+      "n": 10000,
+      "mean": 61.1785,
+      "median": 62.0,
+      "sd": 8.659153298307194,
+      "ci_half_width": 0.169719404646821,
+      "ci_low": 61.00878059535318,
+      "ci_high": 61.34821940464682
+    },
+    "Parity+Target-round2repro": {
+      "n": 10000,
+      "mean": 61.1785,
+      "median": 62.0,
+      "sd": 8.659153298307194,
+      "ci_half_width": 0.169719404646821,
+      "ci_low": 61.00878059535318,
+      "ci_high": 61.34821940464682
+    },
+    "BestHuman-centre-lineonly-clearAdj": {
+      "n": 10000,
+      "mean": 54.4539,
+      "median": 54.0,
+      "sd": 10.462304754310937,
+      "ci_half_width": 0.20506117318449438,
+      "ci_low": 54.2488388268155,
+      "ci_high": 54.658961173184494
+    },
+    "Human-spacing-lineonly-clearAdj": {
+      "n": 10000,
+      "mean": 55.7713,
+      "median": 55.0,
+      "sd": 11.816960707645455,
+      "ci_half_width": 0.2316124298698509,
+      "ci_low": 55.53968757013015,
+      "ci_high": 56.002912429869845
+    }
+  },
+  "paired_vs_density": {
+    "LineBonusDensity": {
+      "n": 10000,
+      "mean": -0.4673,
+      "median": 0.0,
+      "sd": 3.4552459510805082,
+      "ci_half_width": 0.06772282064117796,
+      "ci_low": -0.535022820641178,
+      "ci_high": -0.39957717935882203
+    },
+    "Parity+Target-production": {
+      "n": 10000,
+      "mean": 16.2113,
+      "median": 17.0,
+      "sd": 12.487235299078073,
+      "ci_half_width": 0.24474981186193023,
+      "ci_low": 15.966550188138072,
+      "ci_high": 16.45604981186193
+    },
+    "Parity+Target-round2repro": {
+      "n": 10000,
+      "mean": 16.2113,
+      "median": 17.0,
+      "sd": 12.487235299078073,
+      "ci_half_width": 0.24474981186193023,
+      "ci_low": 15.966550188138072,
+      "ci_high": 16.45604981186193
+    },
+    "BestHuman-centre-lineonly-clearAdj": {
+      "n": 10000,
+      "mean": 9.4867,
+      "median": 9.0,
+      "sd": 11.452001482002803,
+      "ci_half_width": 0.22445922904725493,
+      "ci_low": 9.262240770952745,
+      "ci_high": 9.711159229047256
+    },
+    "Human-spacing-lineonly-clearAdj": {
+      "n": 10000,
+      "mean": 10.8041,
+      "median": 10.0,
+      "sd": 14.630335876622459,
+      "ci_half_width": 0.2867545831818002,
+      "ci_low": 10.5173454168182,
+      "ci_high": 11.0908545831818
+    }
+  },
+  "paired_vs_baseline": {
+    "BestHuman - Parity+Target-production": {
+      "n": 10000,
+      "mean": -6.7246,
+      "median": -8.0,
+      "sd": 13.538082685826705,
+      "ci_half_width": 0.26534642064220343,
+      "ci_low": -6.9899464206422035,
+      "ci_high": -6.459253579357796
+    },
+    "LineBonus - Density": {
+      "n": 10000,
+      "mean": -0.4673,
+      "median": 0.0,
+      "sd": 3.4552459510805082,
+      "ci_half_width": 0.06772282064117796,
+      "ci_low": -0.535022820641178,
+      "ci_high": -0.39957717935882203
+    },
+    "BestHuman - Parity+Target-round2repro": {
+      "n": 10000,
+      "mean": -6.7246,
+      "median": -8.0,
+      "sd": 13.538082685826705,
+      "ci_half_width": 0.26534642064220343,
+      "ci_low": -6.9899464206422035,
+      "ci_high": -6.459253579357796
+    }
+  },
+  "placement": {
+    "P-random": {
+      "definition": "Uniform random legal placement (section 1).",
+      "n": 10000,
+      "sampling_seconds": 0.5859174728393555,
+      "vs_density": {
+        "n": 10000,
+        "mean": 45.1465,
+        "median": 45.0,
+        "sd": 8.781716780047082,
+        "ci_half_width": 0.1721216488889228,
+        "ci_low": 44.97437835111108,
+        "ci_high": 45.31862164888893
+      },
+      "vs_linebonus": {
+        "n": 10000,
+        "mean": 44.6775,
+        "median": 44.0,
+        "sd": 8.829059348475232,
+        "ci_half_width": 0.17304956323011453,
+        "ci_low": 44.504450436769886,
+        "ci_high": 44.85054956323012
+      },
+      "vs_besthuman": {
+        "n": 10000,
+        "mean": 54.6845,
+        "median": 54.0,
+        "sd": 10.396613328717708,
+        "ci_half_width": 0.20377362124286705,
+        "ci_low": 54.48072637875713,
+        "ci_high": 54.88827362124287
+      }
+    },
+    "P-edge": {
+      "definition": "Every ship touches at least one board edge (row 0/9 or column 0/9).",
+      "n": 10000,
+      "sampling_seconds": 54.33744263648987,
+      "vs_density": {
+        "n": 10000,
+        "mean": 51.884,
+        "median": 52.0,
+        "sd": 7.76436555922335,
+        "ci_half_width": 0.15218156496077767,
+        "ci_low": 51.73181843503922,
+        "ci_high": 52.03618156496078
+      },
+      "vs_linebonus": {
+        "n": 10000,
+        "mean": 50.9011,
+        "median": 50.0,
+        "sd": 7.965831044933331,
+        "ci_half_width": 0.1561302884806933,
+        "ci_low": 50.7449697115193,
+        "ci_high": 51.057230288480696
+      },
+      "vs_besthuman": {
+        "n": 10000,
+        "mean": 59.5656,
+        "median": 58.0,
+        "sd": 9.488577340676262,
+        "ci_half_width": 0.18597611587725474,
+        "ci_low": 59.37962388412275,
+        "ci_high": 59.751576115877256
+      }
+    },
+    "P-corner": {
+      "definition": "At least one ship occupies a corner cell (0,0), (0,9), (9,0) or (9,9).",
+      "n": 10000,
+      "sampling_seconds": 1.2412927150726318,
+      "vs_density": {
+        "n": 10000,
+        "mean": 48.9548,
+        "median": 48.0,
+        "sd": 8.129512030656308,
+        "ci_half_width": 0.15933843580086363,
+        "ci_low": 48.79546156419914,
+        "ci_high": 49.11413843580086
+      },
+      "vs_linebonus": {
+        "n": 10000,
+        "mean": 48.508,
+        "median": 48.0,
+        "sd": 8.166958180411607,
+        "ci_half_width": 0.1600723803360675,
+        "ci_low": 48.347927619663935,
+        "ci_high": 48.66807238033607
+      },
+      "vs_besthuman": {
+        "n": 10000,
+        "mean": 59.3295,
+        "median": 59.0,
+        "sd": 7.613588275093569,
+        "ci_half_width": 0.14922633019183396,
+        "ci_low": 59.180273669808166,
+        "ci_high": 59.47872633019184
+      }
+    },
+    "P-interior": {
+      "definition": "No ship touches any board edge (all ships fully interior).",
+      "n": 10000,
+      "sampling_seconds": 7.418890476226807,
+      "vs_density": {
+        "n": 10000,
+        "mean": 37.4805,
+        "median": 36.0,
+        "sd": 8.99770613109598,
+        "ci_half_width": 0.1763550401694812,
+        "ci_low": 37.304144959830516,
+        "ci_high": 37.65685504016948
+      },
+      "vs_linebonus": {
+        "n": 10000,
+        "mean": 37.3412,
+        "median": 36.0,
+        "sd": 9.080431046090172,
+        "ci_half_width": 0.17797644850336738,
+        "ci_low": 37.163223551496635,
+        "ci_high": 37.519176448503366
+      },
+      "vs_besthuman": {
+        "n": 10000,
+        "mean": 45.0755,
+        "median": 41.0,
+        "sd": 12.556534808881016,
+        "ci_half_width": 0.2461080822540679,
+        "ci_low": 44.82939191774593,
+        "ci_high": 45.321608082254066
+      }
+    },
+    "P-spread": {
+      "definition": "No two ships touch each other, even diagonally (Chebyshev distance >= 2 between cells of different ships).",
+      "n": 10000,
+      "sampling_seconds": 3.786379337310791,
+      "vs_density": {
+        "n": 10000,
+        "mean": 46.5341,
+        "median": 46.0,
+        "sd": 8.059958652707117,
+        "ci_half_width": 0.15797518959305948,
+        "ci_low": 46.37612481040694,
+        "ci_high": 46.69207518959306
+      },
+      "vs_linebonus": {
+        "n": 10000,
+        "mean": 45.8606,
+        "median": 45.0,
+        "sd": 8.115069505266577,
+        "ci_half_width": 0.15905536230322492,
+        "ci_low": 45.70154463769677,
+        "ci_high": 46.019655362303226
+      },
+      "vs_besthuman": {
+        "n": 10000,
+        "mean": 55.6183,
+        "median": 56.0,
+        "sd": 5.802876221947589,
+        "ci_half_width": 0.11373637395017275,
+        "ci_low": 55.50456362604982,
+        "ci_high": 55.73203637395017
+      }
+    }
+  },
+  "placement_unpaired_vs_random": {
+    "vs_linebonus": {
+      "P-edge": {
+        "mean_diff": 6.223599999999998,
+        "ci_half_width": 0.23307256019359704,
+        "ci_low": 5.9905274398064,
+        "ci_high": 6.456672560193595
+      },
+      "P-corner": {
+        "mean_diff": 3.8305000000000007,
+        "ci_half_width": 0.2357314537362124,
+        "ci_low": 3.594768546263788,
+        "ci_high": 4.066231453736213
+      },
+      "P-interior": {
+        "mean_diff": -7.336300000000001,
+        "ci_half_width": 0.24823732103776253,
+        "ci_low": -7.584537321037764,
+        "ci_high": -7.088062678962239
+      },
+      "P-spread": {
+        "mean_diff": 1.183099999999996,
+        "ci_half_width": 0.2350420379667083,
+        "ci_low": 0.9480579620332877,
+        "ci_high": 1.4181420379667045
+      }
+    },
+    "vs_besthuman": {
+      "P-edge": {
+        "mean_diff": 4.8811000000000035,
+        "ci_half_width": 0.27588186673143544,
+        "ci_low": 4.605218133268568,
+        "ci_high": 5.156981866731439
+      },
+      "P-corner": {
+        "mean_diff": 4.645000000000003,
+        "ci_half_width": 0.25257115103858097,
+        "ci_low": 4.392428848961422,
+        "ci_high": 4.897571151038584
+      },
+      "P-interior": {
+        "mean_diff": -9.609000000000002,
+        "ci_half_width": 0.31951975974140706,
+        "ci_low": -9.928519759741409,
+        "ci_high": -9.289480240258595
+      },
+      "P-spread": {
+        "mean_diff": 0.933799999999998,
+        "ci_half_width": 0.2333659175495963,
+        "ci_low": 0.7004340824504016,
+        "ci_high": 1.1671659175495943
+      }
+    },
+    "vs_density": {
+      "P-edge": {
+        "mean_diff": 6.737499999999997,
+        "ci_half_width": 0.22975006143666862,
+        "ci_low": 6.507749938563329,
+        "ci_high": 6.9672500614366655
+      },
+      "P-corner": {
+        "mean_diff": 3.8082999999999956,
+        "ci_half_width": 0.23455191139640616,
+        "ci_low": 3.5737480886035895,
+        "ci_high": 4.042851911396402
+      },
+      "P-interior": {
+        "mean_diff": -7.666000000000004,
+        "ci_half_width": 0.24642841193624765,
+        "ci_low": -7.912428411936252,
+        "ci_high": -7.419571588063756
+      },
+      "P-spread": {
+        "mean_diff": 1.387599999999999,
+        "ci_half_width": 0.23362795753763013,
+        "ci_low": 1.153972042462369,
+        "ci_high": 1.6212279575376292
+      }
+    }
+  },
+  "runtime_seconds": 663.843786239624
+}

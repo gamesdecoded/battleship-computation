@@ -1,0 +1,535 @@
+humandecoded — BATTLESHIP COMPUTATION TEST — DEFINITION SHEET
+LOCKED DEFINITIONS FOR THE ENGINE BUILD
+Status: BENCHMARK ONLY at this stage. No production engine,
+script, voiceover, video or thumbnail is authorised by this sheet
+alone. Production engine starts only after Decoder approves this
+sheet and the benchmark verdict in it.
+Governing constraint (Decoder, 2026-10-29 21:07 PKT): ANY
+adjustment must NOT take us behind the competitor (Ballpark
+Figures, BPK). Where a cheaper option would put us behind BPK,
+this sheet locks the stronger option instead, and says so.
+
+================================================================
+0. TEST IN ONE SENTENCE
+================================================================
+Which search strategy actually wins at Battleship, measured in
+average shots to sink a standard fleet, and what human-usable
+rule should a player use — with placement (hiding) as a
+supporting second beat, not a second tournament.
+Question: search-strategy tournament.
+Method: computation-first, follow BPK.
+Length: about 19 minutes (BPK Battleship 18:51), inside the
+blueprint's 18-22 flagship default, earned not padded.
+Pass bar (locked by Decoder): 1,000 views in the first week
+after publishing. Judged on humandecoded's own channel, never
+on BPK's views.
+
+================================================================
+1. BOARD, FLEET, PLACEMENT DISTRIBUTION, TOUCHING
+================================================================
+- Board: 10x10, rows 0-9, columns 0-9, squares 0-99 row-major.
+- Fleet, labelled, in this order:
+  Carrier 5, Battleship 4, Cruiser 3, Submarine 3, Destroyer 2.
+  The two 3-ships are DISTINCT ships. This is the labelled
+  counting that gives BPK's headline number (see section 2).
+- Placement distribution for evaluation: UNIFORM RANDOM LEGAL
+  PLACEMENTS, touching allowed. A legal placement is a straight
+  horizontal or vertical run of the ship's length, inside the
+  board, with no cell shared with another ship. Ships MAY touch
+  each other edge-to-edge or corner-to-corner, and MAY be
+  adjacent. That is the standard Battleship rule, and it is
+  OUR locked definition.
+- BPK repo check: the repo at
+  https://github.com/Ballpark-Figures/battleship is publicly
+  accessible. Its root listing, verified 2026-10-29, contains
+  separate directories named no_ships_touching and
+  no_touching_1234, plus optimized_probs, square_counts and
+  single_ship_probs files. That shows BPK EXPLORED no-touching
+  variants. It does NOT, from the root listing alone, prove
+  which rule BPK's main video used, because file contents
+  were not readable through the tool path used here.
+  Touching-allowed is therefore locked here as OUR definition,
+  NOT as a verified BPK claim. Independent support for
+  touching-allowed as the main count: a Monte Carlo disjoint
+  check (200,000 trials, feasibility report) gave 0.3883,
+  essentially identical to BPK's count divided by the naive
+  labelled product (0.3887). Under a no-touching rule the
+  count would collapse and the heatmap would change
+  materially. If BPK's main rule is ever verified from its
+  code to be different, this sheet must be revised before
+  any script claims comparability with BPK — do not silently
+  keep a mismatched definition.
+- No-touching is a SEPARATE VARIANT, never a silent
+  assumption. If Decoder ever wants it tested, it gets its
+  own heatmap, its own count, and its own scope statement.
+- Placement counts per labelled ship on 10x10:
+  5: 120, 4: 140, 3: 160, 3: 160, 2: 180. Total 760.
+  Naive labelled product ignoring overlap:
+  120 x 140 x 160 x 160 x 180 = 77,414,400,000.
+
+================================================================
+2. HEADLINE COUNT — LABELLED WORDING FOR ON-SCREEN USE
+================================================================
+- Locked on-screen wording:
+  "30,093,975,536 labelled placements — the two 3-ships
+  counted as different ships."
+- Do NOT present that number as unlabelled board
+  configurations. Unlabelled configurations are half:
+  15,046,987,768.
+- The headline count's meaning does not change heatmap
+  ratios: swapping the two 3-ships leaves board occupancy
+  unchanged. It DOES change what the headline number means,
+  so the labelled wording must appear with the number.
+- The count itself is BPK's figure, plausibility-checked
+  (see section 1), not a full enumeration by humandecoded
+  at benchmark stage. The production numbers log must state
+  whether humandecoded's own count reproduces it, and by
+  what method, before the script repeats it as our own.
+
+================================================================
+3. DENSITY DEFINITION — LOCKED, AND WHY
+================================================================
+Locked density: MARGINAL, GROUP-ALL WITH HIT-CONSISTENT
+FALLBACK, SINKING-AWARE PLACEMENT-COUNT. In full:
+- Score(square) = sum, over remaining (unsunk) ships, of the
+  number of placements of that ship that:
+  (a) cover the square,
+  (b) avoid every miss cell,
+  (c) avoid every sunk-ship cell,
+  (d) when unsunk hits exist, cover ALL unsunk hits, IF any
+      placement of that ship does so; otherwise, for that
+      ship only, cover at least one unsunk hit (hit-
+      consistent fallback).
+  In practice: after a single hit, group-all and hit-
+  consistent coincide. After two or more collinear hits
+  from one ship, group-all restricts to placements that
+  could be that ship — which is why it beats hit-
+  consistent by 1.07 shots paired (section 9). When unsunk
+  hits belong to two different ships, no single placement
+  covers all of them, so the fallback applies ship by ship.
+- Sunk lengths are REMOVED from the remaining-ship sum.
+  Sunk cells are BLOCKED for all remaining ships.
+  Miss cells are BLOCKED. Shot squares are never reshot.
+- This is a PLACEMENT-COUNT, not a joint probability.
+  It double-counts boards where two ships could cover the
+  same square, and it does not enforce that different ships'
+  placements are disjoint from each other. The script must
+  say "placement-count" or "highest placement-count", never
+  "most probable" for this score, unless the production
+  engine upgrades to exact joint density (see section 9).
+- Rejected alternative 1: marginal-IGNORE-hits (placements
+  not filtered by hits, except never reshooting). Benchmark:
+  56.94 shots vs 46.47 for hit-consistent on the same 300
+  paired fleets — 10.46 shots worse, paired 95% CI +/-1.08.
+  That WOULD put us behind BPK by about 12 shots, so it is
+  REJECTED under Decoder's constraint, not locked.
+- Superseded (not rejected for weakness): marginal
+  HIT-CONSISTENT alone. Benchmark, same 300 paired fleets:
+  hit-consistent mean 46.47, median 46.0; group-all mean
+  45.40, median 45.0; paired group-all minus hit-consistent
+  -1.07 shots, 95% CI +/-0.61. Group-all is therefore the
+  locked definition, because Decoder's constraint requires
+  the stronger option. Hit-consistent remains the documented
+  fallback inside group-all (section 3, clause d), not a
+  separate locked arm.
+- Rejected alternative 2 (at benchmark stage, see section 9):
+  exact joint density every shot at full tournament scale.
+  Not rejected because it is weaker — it is stronger — but
+  because it is not feasible at 10,000-fleet scale on a
+  single CPU in days. It remains the upgrade path, not the
+  locked scope, unless a compiled benchmark proves otherwise.
+  Do not lock both group-all and joint at once: one density
+  definition per production run, stated on screen.
+
+================================================================
+4. TOURNAMENT ARMS — FOUR, NON-OVERLAPPING
+================================================================
+Metric for every arm: SINGLE-PLAYER shots to sink the whole
+fleet, on the same paired fleets across arms (see section 8).
+Do not run "parity + target" and "targeting-after-hit" as
+two overlapping arms — they double-count targeting.
+
+Arm A — Random (no targeting).
+  Every shot uniform among unshot squares, ignoring hits.
+  No reshooting. Analytic baseline, not a sampled estimate:
+  expected shots to sink all 17 fleet cells = expected
+  maximum position of 17 distinct cells in a random
+  permutation of 100 = 17 x 101 / 18 = 95.39 shots.
+  A sampled Random run is a check on that figure only.
+
+Arm B — Parity hunt + Target.
+  Hunt: only squares of one colour, (row + column) even.
+  50 squares, in random permutation order per game (see
+  section 7). Every ship is length 2 or more, so every ship
+  covers at least one parity square.
+  On a hit, switch to Target (section 5). When the target
+  stack empties and a ship is sunk, return to parity hunt
+  on remaining parity squares.
+
+Arm C — Probability-density (LOCKED NAME IN SCRIPT:
+  "placement-count" strategy, see section 3).
+  Every shot = argmax placement-count score, recomputed
+  after every shot. No separate target stack; targeting
+  emerges from the score, because placements covering
+  unsunk hits score highly near those hits.
+  Tie-break: section 6.
+
+Arm D — Hunt + Target (no parity, no density).
+  Hunt: uniform random among unshot squares, random
+  permutation per game.
+  On a hit, switch to Target (section 5). On sunk, return
+  to hunt.
+  This arm isolates targeting value from parity value
+  and from density value. Without it, no claim about how
+  much of parity's gain is parity and how much is targeting
+  is defensible.
+
+Optional bonus arm, NOT part of the primary claim:
+  Density hunt + explicit Target stack. Only if time
+  permits. It muddies the density-vs-targeting comparison
+  if included in the primary claim, so it must be labelled
+  as a bonus, never as the primary density result.
+
+================================================================
+5. TARGET STACK — LOCKED VERBATIM (Arms B and D)
+================================================================
+1. On a hit, push its orthogonal (up, down, left, right)
+   unshot neighbours onto a stack, in neighbour order:
+   up, right, down, left. Stack is LIFO (last pushed pops
+   first).
+2. Pop and shoot. On a second hit in the same connected
+   group, follow the line: extend in both directions along
+   the hit axis to its ends, shooting unshot squares in
+   line order, until the ship sinks or a miss bounds an end.
+   Implementation in the benchmark: line extensions are
+   pushed AFTER side neighbours, so they pop FIRST (LIFO).
+3. On a miss while targeting, continue with the next stack
+   entry. Do NOT return to hunt until the stack is empty.
+4. Multiple hit groups: the most recent group is finished
+   first, because its entries are on top of the stack.
+   Groups are queued in hit order underneath, not
+   interleaved, unless a new hit creates a new group on
+   top of the stack.
+5. On sunk: identify the sunk length from the size of the
+   contiguous hit group (see section 6 for the assumption),
+   remove one ship of that length from the remaining fleet,
+   clear that group's hits from the unsunk set, resume hunt.
+6. Never reshoot a miss, hit, or sunk cell. No diagonal
+   targeting.
+
+================================================================
+6. SUNK ANNOUNCEMENT, TIE-BREAKING, PARITY COLOUR
+================================================================
+- Sunk announcement: YES, sunk ship identity is known in
+  the sense that matters here — the sunk LENGTH is inferred
+  from the size of the contiguous hit group at sinking.
+  Alternative (only "a ship sunk, length unknown") is NOT
+  locked, because it changes density and targeting
+  materially. Sunk cells are blocked for other ships, and
+  hits from a sunk ship are removed from the unsunk hit set.
+  This matches standard play ("you sunk my battleship")
+  and matches BPK's sinking-aware file names in its repo,
+  though BPK's exact sunk handling was not read from its
+  code through the tool path used here — so this is OUR
+  locked assumption, stated as such, not a verified BPK fact.
+- Tie-breaking for equal density scores (Arm C):
+  among max-score squares, choose the smallest distance
+  to board centre (4.5, 4.5), then lowest row-major index.
+  Deterministic and reproducible. An unstated tie-break
+  makes the result unreproducible, so this rule must be in
+  the numbers log and, in short form, on screen.
+  Centre-first is principled, not arbitrary: among equal
+  marginal counts, centre squares are the ones joint
+  probability would favour, and lowest-index tie-breaking
+  alone would systematically bias shots to the top-left.
+- Parity colour: (row + column) EVEN hunts first. The hunt
+  colour does NOT switch after a sunk ship. Symmetric in
+  expectation, but the code must pick one and record it.
+- Random hunt order: Arms B and D hunt in a random
+  permutation per game. Evaluation must sample hunt
+  permutations as well as fleets, and report that.
+
+================================================================
+7. HUNT ORDER, SEEDING, PAIRING
+================================================================
+- Fleets are sampled by rejection from uniform random legal
+  placements (section 1), seeded and recorded in the numbers
+  log. The same fleets are used across all arms (paired
+  comparison) to cut variance.
+- Hunt permutations are seeded per game per arm and recorded
+  by seed, not by listing every permutation.
+- Production sample sizes are in section 8. Benchmark
+  sample sizes (300 full-board fleets, 50 small-board
+  paired fleets) are NOT production sizes — they are benchmarks.
+
+================================================================
+8. SAMPLE SIZES, CONFIDENCE INTERVALS, METRIC
+================================================================
+- Primary metric: single-player shots to sink, mean and
+  median, with standard deviation and 95% confidence
+  interval for the mean. Report the CI method in the log:
+  mean +/- 1.96 x SD / sqrt(n) for the tournament arms,
+  and paired differences (same fleets) for arm-vs-arm
+  claims, because paired differences have smaller variance
+  than unpaired differences.
+- Production tournament: 10,000-20,000 sampled fleets,
+  paired across arms. Rationale: shot-count SD is about
+  8-13 shots (benchmark), so 10,000 fleets gives a mean
+  95% CI half-width of about 0.2 shots, and a paired
+  difference CI well under 1 shot — enough to separate
+  arms that differ by tens of shots, and enough for the
+  placement beat (section 10) where differences are about
+  1 shot.
+- If production time forces a smaller sample, the CI must
+  widen in the script and on screen. Do not report a
+  10,000-fleet CI on a 1,000-fleet run.
+- Two-player win rate is NOT the primary metric. If any
+  win-rate claim is added later, it needs a separate lock:
+  first-player rule, both placement distributions, and
+  alternating-shot order. Do not frame placement as a
+  win rate on a single-player shots metric.
+
+================================================================
+9. BENCHMARK RESULTS — NUMBERS, AND WHAT THEY MEAN
+================================================================
+Benchmark code (NOT production engine):
+  ~/workspace/sim-lab/battleship/benchmark_prototype.py
+  Log: ~/workspace/sim-lab/battleship/benchmark_log.txt
+Environment: Python 3.12.3, numpy 1.26.4, NO Numba available.
+Timings below are therefore numpy/Python timings — an UPPER
+BOUND on a compiled implementation, which will be faster,
+not slower — except for the joint-count timing, which is
+gcc 13.3.0 compiled and is marked as such.
+
+Initial heatmap (marginal, exact for single-ship counts):
+  0.059 ms per heatmap (numpy, 100 repetitions).
+  Corner square (0,0) score: 10. Centre square (4,4): 34.
+  Ratio 3.4x. That is the marginal heatmap: sum over
+  labelled ships of placements covering the square.
+  Corner per ship: 2. Centre per ship: 2 x length.
+  Carrier centre 10 vs corner 2 = 5x, as in BPK's reported
+  carrier figure.
+One marginal-density shot (score computation):
+  0.293 ms per shot (numpy/Python, 1000 repetitions with
+  20 random misses). At about 45 shots per game, that is
+  about 13 ms of score computation per game, plus game
+  logic — the full tournament below confirms the total.
+
+Full-board tournament, N=300 paired fleets, seed 20261029,
+same fleets across arms (benchmark size, NOT production):
+  Random (sampled): mean 95.24, median not reported in
+    first run, SD 4.95, 95% CI +/-0.56. Analytic 95.39.
+    Sampled and analytic agree, as they must.
+  Hunt+Target: mean 66.64, SD 13.18, CI +/-1.49.
+  Parity+Target: mean 60.82, SD 8.32, CI +/-0.94.
+  Density marginal-ignore-hits: mean 56.94, SD 7.78,
+    CI +/-0.88. REJECTED (section 3).
+  Density marginal-hit-consistent (superseded, section 3):
+    mean 46.47, median 46.0, SD 8.61, CI +/-0.97.
+  Density marginal-group-all (LOCKED):
+    mean 45.40, median 45.0, SD 8.86, 3.0s for 300 fleets.
+  Paired differences vs hit-consistent density:
+    Random - density: +48.77, CI +/-1.12.
+    Hunt+Target - density: +20.17, CI +/-1.76.
+    Parity+Target - density: +14.34, CI +/-1.34.
+    Ignore-hits - hit-consistent: +10.46, CI +/-1.08.
+  Paired group-all minus hit-consistent: -1.07, CI +/-0.61.
+  Total time for 300 fleets x 5 arms: 6.3 seconds.
+  Per fleet, all arms: 0.021 seconds.
+  Extrapolated, same code, no optimisation:
+    10,000 fleets about 3.5 minutes, 20,000 about 7.0 minutes.
+  That extrapolation is for the numpy/Python benchmark
+  code; a compiled production engine will be faster, and
+  the production run must report its own actual time.
+
+Comparison with BPK (paired comparison NOT possible —
+BPK's fleets, seeds and exact density formula are not
+public in the material read here, so this is a level
+comparison, not a paired difference):
+  BPK reported: hunt-target about 63 average, greedy
+  about 45 average / 44 median (from the deep-analysis
+  report). Benchmark here: Hunt+Target 66.64 (about 3.6
+  above BPK's 63), group-all density 45.40 mean / 45.0
+  median (essentially at BPK's 45 / 44-45).
+  Reading: group-all density is AT BPK on density strength
+  on this level comparison, not behind by a material
+  margin. Hit-consistent alone (46.47) was about 1.5 above
+  BPK's 45, which is why group-all, not hit-consistent,
+  is locked — Decoder's constraint requires the stronger
+  option. Hunt+Target being 3.6 above BPK's figure is
+  plausibly target-stack detail / fleet-sample difference,
+  not a scope failure: BPK's hunt-target definition was
+  not read from its code, so no paired claim is made
+  about it.
+
+Small-board paired marginal vs joint (proxy, 7x7,
+fleet [4,3,2], 205,692 labelled fleets enumerated,
+N=50 paired fleets, seed 777):
+  Joint exact: mean 22.42, median 22.0, SD 4.66, CI +/-1.29.
+  Marginal group-all: mean 21.86, median 23.0, SD 5.19,
+    CI +/-1.44.
+  Paired diff marginal-joint: mean -0.56, SD 4.23,
+    CI +/-1.17, median diff -1.0.
+  Reading: on this small-board proxy, group-all marginal
+  is NOT behind exact joint — the paired difference is
+  statistically indistinguishable from zero, with a point
+  estimate slightly in marginal's favour. Proxy limitation:
+  sunk handling in the small-board joint is mask-based
+  (see benchmark_small_joint.py), so this bounds the
+  penalty as small where joint can be measured exactly;
+  it does NOT prove group-all equals joint on 10x10.
+
+Joint-density timing at full-board scale (compiled, gcc):
+  One component of one joint candidate count — fixed
+  Carrier placement (row 4, cols 0-4, covering centre
+  (4,4)), completions of remaining ships [4,3,3,2]
+  disjoint from it, touching allowed:
+  Completions 232,207,034; internal nodes 233,920,867;
+  wall time 1.44 seconds total (gcc -O3, including
+  placement generation).
+  Extrapolation, stated as extrapolation, not measurement:
+  a full candidate count sums about 34 such components
+  (all placements covering the centre square, across all
+  ships), each of similar order, so one candidate is of
+  order tens of seconds in compiled code. One joint shot
+  needs about 100 candidates, so of order tens of minutes
+  per shot. One game (about 45 shots) is therefore of
+  order tens of hours in compiled code, and a 10,000-fleet
+  joint tournament is out of the question. Joint density
+  remains an upgrade path only if a fundamentally smarter
+  counting method (not brute-force per-candidate counting)
+  is proven by prototype. It is NOT the locked scope.
+
+================================================================
+10. PLACEMENT SECOND BEAT — DEFINITIONS
+================================================================
+- Placement strategies must be defined as DISTRIBUTIONS
+  with a sampling rule, or the beat is undefined.
+  Locked examples (production may use these or lock
+  equivalents, but must state them):
+  P-random: uniform random legal placement (section 1).
+  P-edge: uniform among placements satisfying a stated
+    edge condition (e.g. all ships touch an edge, or at
+    least a stated number do) — condition to be stated
+    in the numbers log, not left as "edge-y".
+  P-corner: uniform among placements satisfying a stated
+    corner condition (e.g. at least one ship in a corner,
+    or average distance from centre above a threshold).
+  P-spread / P-cluster: uniform among placements
+    satisfying a stated spread/cluster statistic.
+  Implementation: rejection-sampling uniform placements
+  until the condition holds, and report the condition and
+  the strategy's placement count or its estimate.
+- Opponent for the placement beat: PRIMARY = Arm C density
+  (strongest, most realistic strong opponent, locked
+  definition in section 3). SECONDARY = Arm B parity+target
+  (human-like). Metric: average shots to sink,
+  single-player, lower = better placement.
+- What is exact vs sampled in this beat:
+  Exact: one specific board vs a deterministic searcher
+    (fixed tie-break) — about 45 marginal steps, cheap.
+  Exact as a proxy, NOT as full-game shots: a placement's
+    summed heatmap exposure (sum of heatmap scores over
+    its cells) — do not present exposure as shots.
+  Sampled, with CIs: a placement strategy's full-game
+    average over all its placements. A strategy's placement
+    set can be millions to billions, so it must be estimated
+    over sampled placements from that strategy.
+- Production placement sample: 10,000+ placements per
+  strategy, paired fleets where possible. Rationale:
+  placement differences are about 0.5-2 shots with SD
+  about 10, so 10,000 per strategy gives a difference SE
+  of roughly sqrt(2) x 10 / sqrt(10,000) = 0.14 shots —
+  enough for a 1-shot difference, marginal for 0.5 shots.
+  If a placement difference is smaller than its CI, the
+  script must say "no measurable difference", not invent
+  a winner. That is BPK's own conclusion for fancy
+  placement, and matching it honestly is ahead of
+  inventing a placement winner.
+- BPK placement beat, for comparison: BPK reported
+  placement recaps (Corners, Edges, Into Edges, Center
+  percentages vs random) and concluded fancy placement
+  barely beats random. Our placement beat is AT BPK if
+  it uses the same board/fleet, the same strong opponent,
+  and a sample large enough to separate a 1-shot effect.
+  It is BEHIND BPK if it uses a smaller board, a weaker
+  opponent, or a sample so small that a 1-shot effect
+  cannot be separated. Do not lock a smaller placement
+  sample to save time.
+
+================================================================
+11. ON-SCREEN SCOPE STATEMENTS — EXACT WORDING TO ADAPT
+================================================================
+Tournament beat (adapt numbers to the actual production run):
+"Board 10x10, fleet 5-4-3-3-2, ships may touch. Search
+strategies are computed from all legal placements.
+Averages are over [N] sampled fleets, same fleets for
+every strategy, 95% confidence interval +/- [X] shots.
+Density means highest placement-count, not joint
+probability [unless joint is the production definition,
+in which case replace this sentence with the joint
+definition]. Random baseline is exact: 95.39 shots."
+
+Placement beat (adapt numbers to the actual production run):
+"Placement values are averages over [N] sampled placements
+from each strategy, against a placement-count density
+searcher [locked definition, sunk lengths removed,
+tie-break centre-first then row-major]. The searcher
+itself is computed from all legal placements, not sampled.
+95% confidence interval +/- [X] shots. Placement
+strategies are [state each condition exactly]."
+
+Headline count (see section 2):
+"30,093,975,536 labelled placements — the two 3-ships
+counted as different ships."
+
+Forbidden wording in this test:
+- "Tested on N games" — that is the simulation series
+  signal, never used here.
+- "Most probable square" for a marginal placement-count.
+- "Average over all placements" for a sampled placement
+  strategy, or "average over all fleets" for a sampled
+  tournament.
+- Any BPK number presented as humandecoded's own without
+  a production run reproducing it in the numbers log.
+
+================================================================
+12. REJECTED SCOPES — AND WHY THEY WOULD PUT US BEHIND BPK
+================================================================
+- Smaller board / smaller fleet for full exhaustiveness
+  (e.g. 6x6 fleet [4,3,2], about 53,000 placements):
+  REJECTED for the flagship test. It would allow the word
+  "all", but the game is no longer Battleship as BPK and
+  viewers know it, and results do not transfer to 10x10.
+  Behind BPK on board/fleet size and comparability.
+- Marginal-ignore-hits density: REJECTED, 10.46 shots
+  behind hit-consistent on paired fleets (section 9).
+- Monte Carlo evaluation presented as computation:
+  REJECTED. Sampling fleets for evaluation is allowed and
+  must be labelled (section 8); presenting a Monte Carlo
+  STRATEGY as a computed strategy is not. The strategy
+  here is deterministic computation; the evaluation sample
+  is the only sampled part, and it is labelled.
+- No-touching as a silent assumption: REJECTED, because
+  it changes the count and heatmap without a scope
+  statement (section 1).
+- Joint density promised without a compiled benchmark:
+  REJECTED as a promise, not as a method. If the compiled
+  benchmark proves joint feasible at production scale,
+  joint becomes the locked definition and the script
+  wording changes to joint probability — that would be
+  AHEAD of BPK's marginal-style greedy, not behind it.
+
+================================================================
+END — Definition sheet, benchmark stage only.
+Next steps, in order, before any production engine:
+  1. Decoder approves this sheet, including the locked
+     group-all density definition in section 3.
+  2. Production engine build starts, under this sheet,
+     with a numbers log tracing every script number to
+     a production run. Production must re-run the
+     tournament at 10,000-20,000 fleets and the placement
+     beat at 10,000+ placements per strategy, and must
+     report its own actual times and CIs — benchmark
+     numbers above are not production numbers.
+================================================================

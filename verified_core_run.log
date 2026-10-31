@@ -1,0 +1,22 @@
+fleets sampled 0.6s
+Density: mean 44.97  time 71.0s
+LineBonus: mean 44.50  time 80.6s
+ParityTarget-prod: mean 61.18
+ParityTarget-r2: mean 61.18
+BestHuman: mean 54.45
+SpacingHuman: mean 55.77
+placement P-random: linebonus 44.68 besthuman 54.68 density 45.15
+placement P-edge: linebonus 50.90 besthuman 59.57 density 51.88
+placement P-corner: linebonus 48.51 besthuman 59.33 density 48.95
+placement P-interior: linebonus 37.34 besthuman 45.08 density 37.48
+placement P-spread: linebonus 45.86 besthuman 55.62 density 46.53
+Wrote verified_core.json in 663.8s
+  Density-group-all: 44.97 median 44.0 CI +/-0.17
+  LineBonusDensity: 44.50 median 44.0 CI +/-0.18
+  Parity+Target-production: 61.18 median 62.0 CI +/-0.17
+  Parity+Target-round2repro: 61.18 median 62.0 CI +/-0.17
+  BestHuman-centre-lineonly-clearAdj: 54.45 median 54.0 CI +/-0.21
+  Human-spacing-lineonly-clearAdj: 55.77 median 55.0 CI +/-0.23
+paired besthuman - prod baseline: {'n': 10000, 'mean': -6.7246, 'median': -8.0, 'sd': 13.538082685826705, 'ci_half_width': 0.26534642064220343, 'ci_low': -6.9899464206422035, 'ci_high': -6.459253579357796}
+paired besthuman - r2 baseline: {'n': 10000, 'mean': -6.7246, 'median': -8.0, 'sd': 13.538082685826705, 'ci_half_width': 0.26534642064220343, 'ci_low': -6.9899464206422035, 'ci_high': -6.459253579357796}
+paired linebonus - density: {'n': 10000, 'mean': -0.4673, 'median': 0.0, 'sd': 3.4552459510805082, 'ci_half_width': 0.06772282064117796, 'ci_low': -0.535022820641178, 'ci_high': -0.39957717935882203}

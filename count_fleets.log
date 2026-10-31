@@ -1,0 +1,10 @@
+ship 0 length 5 placements 120
+ship 1 length 4 placements 140
+ship 2 length 3 placements 160
+ship 3 length 3 placements 160
+ship 4 length 2 placements 180
+LABELLED_FLEETS=30093975536
+BPK=30093975536
+MATCH=YES
+UNLABELLED_HALF=15046987768
+SECONDS=52.6

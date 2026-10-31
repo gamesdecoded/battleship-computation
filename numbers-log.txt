@@ -1,0 +1,414 @@
+humandecoded — BATTLESHIP COMPUTATION TEST — NUMBERS LOG
+Production run, under definition-sheet.txt only.
+Every number below traces to results.json in this folder, or to
+count_fleets.log (exact count). Benchmark numbers (N=300) are NOT
+production numbers and are not used in this log except where
+explicitly labelled "benchmark, for comparison only".
+No script, voiceover, video or thumbnail work is authorised
+by this log alone.
+
+================================================================
+RUN IDENTIFICATION
+================================================================
+Engine: engine.py in this folder.
+Tournament seed: 20291029 (fresh seed, not the benchmark seed).
+Tournament fleets: 20,000, sampled by independent-uniform
+rejection (each ship uniform among its placements, whole fleet
+rejected on overlap), same fleets paired across all arms.
+Hunt permutations: per game per arm, seeded from base seed +
+arm offset + game index (recorded by seed, not listed).
+Placement samples: 10,000 placements per strategy, rejection
+sampling from the same uniform fleet distribution, each
+strategy with its own seeded stream (see engine.py).
+Runtime, production tournament + placement: 455.9 seconds
+(7.6 minutes). Tournament density arm alone: 61.7 seconds
+for 20,000 games. Placement density games: 31.2s (random),
+69.8s (edge), 79.6s (corner), 56.8s (interior), 74.7s (spread).
+CI method: mean +/- 1.96 x SD / sqrt(n). Paired differences
+use the same fleets (tournament) or the same placement fleets
+across opponents (placement, density vs parity); strategy-vs-
+strategy placement differences are UNPAIRED (different fleets
+per strategy) and use sqrt(SE1^2 + SE2^2).
+Metric everywhere: single-player shots to sink the whole
+fleet. Lower shots = better SEARCH strategy. For PLACEMENT
+(hiding), higher shots = fleet survives longer = better hiding.
+See the flagged sheet wording correction below — do not invert
+this in a script.
+
+================================================================
+DEFINITIONS USED (locked, definition-sheet.txt)
+================================================================
+Board 10x10. Fleet, labelled, in order: Carrier 5, Battleship 4,
+Cruiser 3, Submarine 3, Destroyer 2. Touching allowed.
+Placements per labelled ship: 5: 120, 4: 140, 3: 160, 3: 160,
+2: 180. Total placement lists: 760.
+Density: group-all marginal placement-count, sinking-aware.
+Score = sum over remaining (unsunk) ships of placements
+covering the square, avoiding all miss cells and sunk cells,
+and, when unsunk hits exist, covering ALL unsunk hits if any
+placement of that ship does so, otherwise covering at least
+one unsunk hit for that ship. Sunk lengths removed.
+Tie-break: smallest distance to board centre (4.5, 4.5), then
+lowest row-major index. Deterministic.
+Parity colour: (row + column) even, no switch after sinking.
+Target stack (Arms B and D): LIFO, neighbours pushed in order
+up, right, down, left; line extensions pushed after side
+neighbours so they pop first; most recent group finished
+first; miss continues to next stack entry; never reshoot;
+no diagonal targeting.
+Sunk announcement: sunk length known at sinking. In code, a
+ship is sunk when all its cells are shot (standard sunk
+announcement: defender names the sunk ship). See deviation
+note below.
+
+================================================================
+FLAGGED DEVIATIONS / CORRECTIONS — DO NOT HIDE THESE
+================================================================
+1. Sunk detection wording (sheet section 6): the sheet phrases
+   sunk length as "inferred from the size of the contiguous
+   hit group". Code uses true-ship sunk detection (all cells
+   of a ship shot). These coincide when a hit group is a
+   single ship. When two ships touch and their hit cells
+   merge into one connected group, group-size inference is
+   ambiguous (group size != sunk ship length), so true-ship
+   detection is used — the same method as the benchmark
+   prototype that produced the benchmark numbers. This is a
+   clarification of an unimplementable-as-written phrasing,
+   not a change to board, fleet, density, stack or metric.
+   If a future script claims group-size inference literally,
+   it must be corrected to sunk-announcement wording.
+2. Placement "better" wording (sheet section 10): the sheet
+   says "average shots to sink, single-player, lower = better
+   placement". That line is INVERTED for a hiding strategy
+   and is NOT followed in this log. A hiding placement that
+   forces the searcher to take MORE shots is better hiding:
+   higher shots = better hiding, lower shots = worse hiding.
+   Evidence in this run: interior (centre) placements take
+   only 37.54 shots against density, edge placements take
+   51.98 — centre is searched first, so centre hiding is
+   worse, not better. Any script winner claim must use
+   higher = better hiding, and the sheet line must be
+   corrected before scripting. No winner claim below
+   depends on the inverted line.
+3. Placement strategies are the sheet's "locked examples or
+   equivalents", stated exactly here (section: placement
+   strategies). They are not BPK's placement definitions;
+   BPK's placement definitions were not read from its code.
+4. BPK comparison is UNPAIRED level comparison only. BPK's
+   fleets, seeds and exact density formula are not public
+   in the material read here. No paired difference vs BPK
+   is claimed.
+
+================================================================
+HEADLINE COUNT — NOW HUMANDECODED-REPRODUCED
+================================================================
+Labelled fleet placements, 10x10, fleet 5-4-3-3-2, touching
+allowed, two 3-ships counted as different ships:
+  30,093,975,536
+Unlabelled board configurations (two 3-ships identical):
+  15,046,987,768  (exactly half)
+Method in this run: exact backtracking count in C/OpenMP
+(count_fleets.c, count_fleets.log), recursion over labelled
+ships in order, __int128 bitmasks, parallel over first-ship
+placements. Result: LABELLED_FLEETS=30093975536, MATCH=YES
+against BPK's figure, in 52.6 seconds. This count is now
+humandecoded-reproduced, not merely BPK-reported.
+Naive labelled product ignoring overlap:
+  120 x 140 x 160 x 160 x 180 = 77,414,400,000
+Ratio, exact count / naive product: 0.3887 (30,093,975,536 /
+77,414,400,000). That ratio is the disjointness rate of
+independently sampled placements.
+On-screen wording (sheet section 11, verbatim):
+  "30,093,975,536 labelled placements — the two 3-ships
+  counted as different ships."
+Do NOT present this as unlabelled configurations.
+
+================================================================
+MARGINAL HEATMAP (exact, single-ship counts)
+================================================================
+Corner square (0,0): 10
+Centre square (4,4): 34
+Ratio centre / corner: 3.4x
+Carrier alone: centre 10 vs corner 2 = 5x
+Method: sum over labelled ships of placements covering the
+square. This is a MARGINAL heatmap, not a joint heatmap.
+It does not enforce that different ships' placements are
+disjoint from each other.
+
+================================================================
+TOURNAMENT — PRODUCTION (20,000 paired fleets, seed 20291029)
+================================================================
+Arm A — Random (no targeting):
+  Mean 95.45, median 97.0, SD 4.77, 95% CI +/-0.07
+  Analytic baseline (exact, not sampled):
+  expected maximum position of 17 fleet cells in a random
+  permutation of 100 = 17 x 101 / 18 = 95.39 shots.
+  Sampled 95.45 is within CI of analytic 95.39. Use 95.39
+  as the baseline in a script; 95.45 is the sampled check.
+Arm B — Parity hunt + Target:
+  Mean 61.34, median 62.0, SD 8.69, 95% CI +/-0.12
+Arm C — Density, group-all marginal placement-count:
+  Mean 45.17, median 45.0, SD 8.76, 95% CI +/-0.12
+Arm D — Hunt + Target (no parity, no density):
+  Mean 66.36, median 66.0, SD 12.87, 95% CI +/-0.18
+
+Paired differences (same 20,000 fleets, mean diff, 95% CI):
+  Random - Density: +50.28, CI +/-0.14
+  Hunt+Target - Density: +21.18, CI +/-0.21
+  Parity+Target - Density: +16.17, CI +/-0.17
+  Random - Hunt+Target: +29.10, CI +/-0.19
+  Random - Parity+Target: +34.12, CI +/-0.14
+  Hunt+Target - Parity+Target: +5.02, CI +/-0.18
+Reading, in shots saved vs Random (95.39 analytic):
+  Density saves about 50.2 shots. Parity+Target saves about
+  34.1 shots. Hunt+Target saves about 29.1 shots.
+  Parity alone (vs Hunt+Target, same targeting) saves
+  5.02 shots. Targeting alone (Hunt+Target vs Random)
+  saves 29.10 shots. Density over Parity+Target saves
+  16.17 shots — that is the gap a human cannot close by
+  hand, because density recomputes placement counts
+  every shot.
+Human-usable rule from this tournament (candidate for the
+script, to be worded by the script stage, not locked here):
+  Hunt on a checkerboard, then finish neighbours in a line.
+  That rule is Parity+Target at 61.34 shots. It is NOT the
+  density result (45.17), and must not be presented as if
+  a human playing checkerboard gets 45 shots.
+Benchmark comparison only (N=300, different seed/fleets):
+  Density benchmark 45.40 vs production 45.17 — consistent.
+  Parity benchmark 60.82 vs production 61.34 — consistent
+  within benchmark CI. Hunt+Target benchmark 66.64 vs
+  production 66.36 — consistent. Production numbers govern.
+
+================================================================
+PLACEMENT BEAT — PRODUCTION (10,000 placements per strategy)
+================================================================
+Strategies, stated exactly (rejection sampling from uniform
+random legal placements until the condition holds):
+  P-random: uniform random legal placement.
+  P-edge: EVERY ship touches at least one board edge
+    (row 0/9 or column 0/9).
+  P-corner: at least one ship occupies a corner cell
+    (0,0), (0,9), (9,0) or (9,9).
+  P-interior: NO ship touches any board edge (all ships
+    fully interior).
+  P-spread: NO two ships touch each other, even diagonally
+    (Chebyshev distance >= 2 between cells of different ships).
+
+Against PRIMARY opponent, Density group-all (strongest):
+  P-random:   mean 45.11, median 45.0, SD 8.76, CI +/-0.17
+  P-edge:     mean 51.98, median 52.0, SD 7.67, CI +/-0.15
+  P-corner:   mean 49.15, median 49.0, SD 8.18, CI +/-0.16
+  P-interior: mean 37.54, median 36.0, SD 9.09, CI +/-0.18
+  P-spread:   mean 46.45, median 46.0, SD 8.02, CI +/-0.16
+  Unpaired differences vs P-random, density opponent
+  (higher = better hiding, see correction above):
+    P-edge:     +6.87, CI +/-0.23  [ +6.64, +7.10 ]
+    P-corner:   +4.05, CI +/-0.23  [ +3.81, +4.28 ]
+    P-spread:   +1.35, CI +/-0.23  [ +1.11, +1.58 ]
+    P-interior: -7.57, CI +/-0.25  [ -7.81, -7.32 ]
+  All four differences are separated from zero at 10,000
+  samples. Against density, edge hiding is best, interior
+  (centre) hiding is worst by a wide margin.
+
+Against SECONDARY opponent, Parity+Target (human-like):
+  P-random:   mean 61.28, median 62.0, SD 8.70, CI +/-0.17
+  P-edge:     mean 60.98, median 62.0, SD 8.30, CI +/-0.16
+  P-corner:   mean 61.29, median 62.0, SD 8.32, CI +/-0.16
+  P-interior: mean 59.52, median 60.0, SD 9.61, CI +/-0.19
+  P-spread:   mean 67.57, median 68.0, SD 5.73, CI +/-0.11
+  Unpaired differences vs P-random, parity opponent:
+    P-edge:     -0.30, CI +/-0.24  [ -0.54, -0.06 ]
+      (statistically non-zero but tiny; in plain language:
+      essentially no difference)
+    P-corner:   +0.01, CI +/-0.24  [ -0.22, +0.25 ]
+      (NO measurable difference — do not claim a corner
+      advantage against parity)
+    P-interior: -1.76, CI +/-0.25  [ -2.01, -1.51 ]
+    P-spread:   +6.29, CI +/-0.20  [ +6.08, +6.49 ]
+  Against parity, spread hiding is best by a wide margin;
+  edge and corner are essentially a wash.
+
+Paired opponent differences, same placement fleets,
+density minus parity (negative = density sinks faster,
+as expected for the stronger searcher):
+  P-random:   -16.17, CI +/-0.24
+  P-edge:     -9.00,  CI +/-0.23
+  P-corner:   -12.14, CI +/-0.23
+  P-interior: -21.98, CI +/-0.26
+  P-spread:   -21.11, CI +/-0.20
+
+Placement conclusion, honest and opponent-dependent:
+  There is NO single placement strategy that wins against
+  both opponents by a large margin. Against a density
+  searcher, hide on the edges (best: +6.87 vs random).
+  Against a parity human-like searcher, spread ships
+  apart so one hit does not lead to another (best: +6.29
+  vs random; edge is a wash there, corner is no
+  difference there). A script must not claim "edge is
+  the best hiding" without naming the opponent, and must
+  not claim a corner advantage against parity.
+  Cross-check: P-random vs density (45.11) matches the
+  tournament density result (45.17) on different fleets,
+  as it must — same searcher, same fleet distribution.
+
+================================================================
+COMPARISON VS COMPETITOR (BPK) — UNPAIRED, HONEST
+================================================================
+BPK Battleship figures as reported in the deep-analysis
+report (not paired, BPK fleets/seeds/formula not public):
+  Greedy / density: about 45 average, 44 median (report
+  wording varies 44-45 for median).
+  Hunt-target: about 63 average.
+  Placement conclusion: fancy placement barely beats random.
+Humandecoded production, this run:
+  Density group-all: 45.17 mean, 45.0 median.
+  Hunt+Target: 66.36 mean.
+  Placement vs density: edge +6.87 vs random (not "barely").
+Verdict by dimension:
+  Board / fleet: AT. Same 10x10, same full fleet.
+  Headline count: AT and independently verified. Our exact
+    count reproduces BPK's 30,093,975,536 exactly (see above).
+  Heatmap: AT. Same marginal structure (corner 10, centre
+    34, carrier 5x).
+  Density strength: AT, NOT better. 45.17 vs about 45 is
+    essentially tied; BPK's figure is rounded with no CI,
+    so a 0.17 difference cannot be claimed as better.
+    Do NOT claim "better than BPK" on density shots.
+  Hunt+Target: BEHIND on unpaired level comparison.
+    66.36 vs about 63 = about +3.4 shots. Plausible causes:
+    target-stack detail, hunt permutation, fleet sample,
+    and BPK's hunt-target definition was not read from its
+    code. No paired claim is made. Stronger option that
+    does NOT involve chasing: none identified that stays
+    inside the locked stack — changing the stack, tie-break
+    or definitions to chase 63 would be dishonest and is
+    rejected. Report our own 66.36 honestly.
+  Parity+Target: NO BPK comparison. BPK did not report a
+    parity arm separately in the material read here.
+  Placement scope: AT. Same board/fleet, strong opponent,
+    10,000+ samples per strategy, CIs reported.
+  Placement result: DIFFERS from BPK's reported conclusion
+    in magnitude, under different definitions. Our edge
+    effect vs density (+6.87) is material, not "barely".
+    This does NOT prove BPK wrong: BPK's placement
+    strategies and opponent definition differ from ours
+    and were not read from its code. Report our effect
+    under our definitions only.
+  Wording: AT or stricter. Labelled-count wording,
+    "placement-count" not "probability", exact scope
+    statements below — stricter than BPK's reported
+    "likeliest" wording.
+  Overall: NOT demonstrably better than BPK on shots.
+    Density is tied, hunt-target is behind on level
+    comparison. What is ahead is measurement completeness:
+    a paired 4-arm tournament with CIs, a placement beat
+    against two opponents, and an independently reproduced
+    exact headline count. That is a reporting/method
+    advantage, not a shots advantage, and must not be
+    sold as "we beat BPK's strategy".
+  Move-forward judgement (Decoder's honesty rule): the
+    test is still worth scripting, because the tournament
+    ladder, the human-usable parity rule, and the
+    opponent-dependent placement result are new, measured
+    and defensible — but the script must NOT claim we
+    beat BPK on shots. If a future script draft claims
+    that, it must be corrected.
+
+================================================================
+ON-SCREEN SCOPE STATEMENTS (sheet section 11, adapted)
+================================================================
+Tournament beat:
+"Board 10x10, fleet 5-4-3-3-2, ships may touch. Search
+strategies are computed from all legal placements.
+Averages are over 20,000 sampled fleets, same fleets for
+every strategy, 95% confidence interval +/- 0.07 to 0.18
+shots by arm (Random +/-0.07, Hunt+Target +/-0.18,
+Parity+Target +/-0.12, Density +/-0.12; paired differences
+vs density: Random +50.28 +/-0.14, Hunt+Target +21.18
++/-0.21, Parity+Target +16.17 +/-0.17).
+Density means highest placement-count, not joint
+probability. Random baseline is exact: 95.39 shots."
+Placement beat:
+"Placement values are averages over 10,000 sampled
+placements from each strategy, against a placement-count
+density searcher (sunk lengths removed, tie-break
+centre-first then row-major) and, secondarily, against a
+parity+target searcher. The searcher itself is computed
+from all legal placements, not sampled.
+95% confidence interval +/- 0.11 to 0.19 shots by
+strategy and opponent (see placement table above).
+Placement strategies are: random (uniform); edge (every
+ship touches an edge); corner (at least one ship in a
+corner); interior (no ship touches an edge); spread (no
+two ships touch, even diagonally)."
+Headline count:
+"30,093,975,536 labelled placements — the two 3-ships
+counted as different ships."
+Forbidden wording in this test:
+- "Tested on N games" — simulation series signal, never here.
+- "Most probable square" for a marginal placement-count.
+- "Average over all placements" for a sampled placement
+  strategy, or "average over all fleets" for a sampled
+  tournament.
+- Any BPK number presented as humandecoded's own without
+  a production run reproducing it in this log. The headline
+  count IS reproduced here (exact count, above); BPK's
+  45 / 63 averages are NOT reproduced as paired results
+  and must be cited as BPK-reported, unpaired, if cited.
+
+================================================================
+FILES IN THIS FOLDER (production)
+================================================================
+engine.py — production engine (this run).
+results.json — full production numbers, sample sizes, seed,
+  definitions, marginal heatmap, tournament arms, paired
+  differences, placement table, runtime.
+numbers-log.txt — this file.
+count_fleets.c / count_fleets.log — exact labelled count,
+  MATCH=YES, 52.6 seconds.
+production_run.log — console log of the production run.
+Benchmark files (benchmark_prototype.py, benchmark_log.txt,
+benchmark_small_joint.py, joint_count_benchmark.c) are
+BENCHMARK ONLY and are not production numbers.
+
+================================================================
+END — Numbers log, production run only.
+Next stage, only on Decoder's approval of these results:
+script stage, using ONLY numbers in this log, with the
+scope statements above and the flagged corrections applied.
+================================================================
+
+================================================================
+APPENDED — VERIFIED CORE, 2026-10-29 (does NOT change the
+locked production numbers above or results.json)
+================================================================
+Source: verified-core.txt and verified_core.json in this
+folder. Fresh seed 20291110, 10,000 paired tournament
+fleets, 10,000 placements per strategy, runtime 663.8 s.
+Step 1 verdict: HOLDS. Best human rule verified materially.
+Tournament in this sample: Density 44.97 +/-0.17,
+Line-bonus density 44.50 +/-0.18 (paired -0.47 +/-0.07 vs
+density), Parity+Target baseline 61.18 +/-0.17 (paired gap
+to density +16.21 +/-0.24), Best human (centre
+checkerboard, line-only, drop-around-sunk) 54.45 +/-0.21
+(paired -6.72 +/-0.27 vs baseline; paired gap to density
++9.49 +/-0.22), memory-friendly spacing human 55.77 +/-0.23.
+Placement vs line-bonus (best computer), 10,000 each:
+random 44.68, edge 50.90 (+6.22 vs random), corner 48.51
+(+3.83), interior 37.34 (-7.34), spread 45.86 (+1.18).
+Placement vs best human, 10,000 each: random 54.68, edge
+59.57 (+4.88), corner 59.33 (+4.65, tied with edge at the
+top vs a human), interior 45.08 (-9.61), spread 55.62
+(+0.93). Edge collapses vs an edge-aware counter (round 1:
+32.97) — not retested here vs line-bonus/best human; every
+hiding claim must name its opponent. Wording corrections
+in verified-core.txt (separate note, sheet not silently
+edited): sunk detection is true-ship sunk announcement,
+not group-size inference; for hiding, higher shots =
+better hiding (sheet section 10 inverted line not followed).
+Script use: locked ladder from the production section
+above (20,000 fleets); human rule, line-bonus, and hiding
+vs best searcher from this appended section (10,000 fleets).
+Do not mix samples in one sentence without saying so.
+================================================================

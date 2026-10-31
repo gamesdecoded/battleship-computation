@@ -1,0 +1,129 @@
+{
+  "seed": 20291120,
+  "example_fleet": {
+    "selection": "300 sampled fleets, each run through all four arms; chosen fleet minimises sum over arms of |count - arm mean| / arm SD (closest to the arm means, not a cherry-picked freak). Arm means over the 300 are reported alongside.",
+    "index_in_sample": 256,
+    "distance_sd_units": 0.532338669203823,
+    "ships": [
+      {
+        "ship": "Carrier (5)",
+        "cells_0indexed": [
+          80,
+          81,
+          82,
+          83,
+          84
+        ],
+        "description": "row 9, columns 1 to 5"
+      },
+      {
+        "ship": "Battleship (4)",
+        "cells_0indexed": [
+          40,
+          50,
+          60,
+          70
+        ],
+        "description": "column 1, rows 5 to 8"
+      },
+      {
+        "ship": "Cruiser (3)",
+        "cells_0indexed": [
+          36,
+          46,
+          56
+        ],
+        "description": "column 7, rows 4 to 6"
+      },
+      {
+        "ship": "Submarine (3)",
+        "cells_0indexed": [
+          55,
+          65,
+          75
+        ],
+        "description": "column 6, rows 6 to 8"
+      },
+      {
+        "ship": "Destroyer (2)",
+        "cells_0indexed": [
+          88,
+          89
+        ],
+        "description": "row 9, columns 9 to 10"
+      }
+    ],
+    "shot_counts": {
+      "Random": 96,
+      "Parity+Target": 62,
+      "Density": 43,
+      "BestHuman-centre": 54
+    },
+    "arm_means_300": {
+      "Random": 95.4,
+      "Parity+Target": 61.38,
+      "Density": 45.7,
+      "BestHuman-centre": 54.45
+    },
+    "arm_sds_300": {
+      "Random": 4.49,
+      "Parity+Target": 8.54,
+      "Density": 9.52,
+      "BestHuman-centre": 10.72
+    }
+  },
+  "counter_search": {
+    "definition": "Edge-aware density: group-all marginal placement-count, but per ship only edge-touching placements are counted (round-1 definition).",
+    "n_per_strategy": 2000,
+    "random_vs_edge_aware": {
+      "n": 2000,
+      "mean": 72.1885,
+      "median": 75.0,
+      "sd": 11.673607167544704,
+      "ci_half_width": 0.5116183917174711,
+      "ci_low": 71.67688160828253,
+      "ci_high": 72.70011839171748
+    },
+    "edge_vs_edge_aware": {
+      "n": 2000,
+      "mean": 32.8395,
+      "median": 33.0,
+      "sd": 4.694225988255615,
+      "ci_half_width": 0.2057335248651194,
+      "ci_low": 32.633766475134884,
+      "ci_high": 33.04523352486512
+    },
+    "unpaired_edge_minus_random_vs_edge_aware": {
+      "mean_diff": -39.349000000000004,
+      "ci_half_width": 0.5514341864601782
+    },
+    "round1_edge_vs_edge_aware_for_comparison": 32.97,
+    "note": "Same-searcher comparison is edge vs edge-aware against random vs edge-aware. Comparing edge vs edge-aware with random vs plain density mixes searchers and is not used."
+  },
+  "origin_drop_variant": {
+    "n": 10000,
+    "best_human_clear_adjacent": {
+      "n": 10000,
+      "mean": 54.3546,
+      "median": 54.0,
+      "sd": 10.26107147420677,
+      "ci_half_width": 0.20111700089445267,
+      "ci_low": 54.15348299910554,
+      "ci_high": 54.555717000894454
+    },
+    "best_human_origin_only": {
+      "n": 10000,
+      "mean": 54.31,
+      "median": 54.0,
+      "sd": 10.17637734488981,
+      "ci_half_width": 0.1994569959598403,
+      "ci_low": 54.11054300404016,
+      "ci_high": 54.509456995959845
+    },
+    "paired_origin_minus_adjacent": {
+      "mean_diff": -0.0446,
+      "ci_half_width": 0.030861497816845343
+    },
+    "reading": "If the paired difference is small, the script's origin-only drop wording describes the measured rule to within that difference; the script numbers remain the verified clear-adjacent numbers unless the difference is material."
+  }
+}

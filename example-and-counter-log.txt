@@ -1,0 +1,282 @@
+humandecoded — BATTLESHIP COMPUTATION TEST — EXAMPLE FLEET AND COUNTER-SEARCH LOG
+For script v2. Plain .txt. This log does NOT change numbers-log.txt
+(locked production, 20,000 fleets) or verified-core.txt (verified core,
+10,000 fleets). All figures below are from the runs described here,
+except where a figure is explicitly labelled with its source sample.
+
+RUN CODE
+example_counter_run.py in this folder. Fresh seed 20291120, distinct
+from production 20291029, benchmark 20261029, round-1 20291101,
+round-2 20291102, verified-core 20291110.
+Sunk announcement throughout: a ship is sunk when all its cells are
+shot, and the defender names the sunk ship (not group-size inference).
+Board 10x10, fleet 5-4-3-3-2 labelled, ships may touch, single-player
+shots to sink the whole fleet. Lower shots = better search.
+Higher shots = better hiding.
+
+================================================================
+1. EXAMPLE FLEET — DEFINED, RUN, AND CHOSEN BEFORE SCRIPTING
+================================================================
+Selection method (stated before the choice, so it is not cherry-
+picking): 300 fleets were sampled by independent-uniform rejection
+(the production distribution). Each fleet was run through all four
+arms: Random, Parity+Target, Density (group-all placement-count),
+and the centre-out best human rule (centre checkerboard hunt,
+line-only after two collinear hits, drop-around-sunk, clear-
+adjacent version). The chosen fleet is the one that minimises,
+summed over the four arms, |fleet count - arm mean| / arm SD
+over the 300 fleets. Distance for the chosen fleet: 0.53 SD units
+in total across four arms. A freak fleet would be far from the
+means on at least one arm; this fleet is close on all four.
+
+Chosen fleet (rows 1-10 top to bottom, columns 1-10 left to right;
+0-indexed cells in brackets):
+  Carrier, 5 squares:    row 9, columns 1 to 5        [80, 81, 82, 83, 84]
+  Battleship, 4 squares: column 1, rows 5 to 8         [40, 50, 60, 70]
+  Cruiser, 3 squares:    column 7, rows 4 to 6         [36, 46, 56]
+  Submarine, 3 squares:  column 6, rows 6 to 8         [55, 65, 75]
+  Destroyer, 2 squares:  row 9, columns 9 to 10        [88, 89]
+Note for the script: ships in this fleet touch. The Carrier (row 9,
+columns 1-5) sits directly below the Battleship (column 1, rows 5-8),
+and the Cruiser (column 7, rows 4-6) sits directly beside the
+Submarine (column 6, rows 6-8). That touching is why the drop rule
+needs its origin-only definition (section 3 below): a target that
+touches a sunk ship may also belong to a different, unsunk hit.
+
+Shot counts on this fleet, by arm (one fleet, four searches):
+  Random (random order, no plan):              96 shots
+  Parity+Target (black squares, then neighbours): 62 shots
+  Density (group-all placement-count):        43 shots
+  Centre-out best human rule:                 54 shots
+Arm means over the same 300 fleets (for comparison, on screen
+alongside the fleet counts, not merged with them):
+  Random: 95.4 (SD 4.49)
+  Parity+Target: 61.38 (SD 8.54)
+  Density: 45.7 (SD 9.52)
+  Centre-out best human: 54.45 (SD 10.72)
+Reading: the example fleet is near every arm mean. Random 96
+against a mean of 95.4, Parity 62 against 61.38, best human 54
+against 54.45 are all within a shot or two of their means.
+Density 43 against a mean of 45.7 is about three shots below
+its mean, well within one SD (9.52). No arm count on this fleet
+is an outlier, and no count is presented without its arm mean
+alongside it in the script's on-screen table.
+
+================================================================
+2. COUNTER-SEARCH — RANDOM VS EDGE-AWARE, SAME SEARCHER
+================================================================
+Definition (round-1 definition, re-implemented here): edge-aware
+density is group-all marginal placement-count, except that, per
+ship, only placements that touch at least one board edge
+(row 1 or 10, or column 1 or 10) are counted. It is the searcher
+that knows the hider hides on edges, and only considers
+edge-touching placements.
+Sample: 2,000 random placements and 2,000 edge placements,
+same sample size as the round-1 edge-aware run (2,000 per
+strategy), fresh seed 20291120, same placement definitions as
+production (random: uniform legal placement; edge: every ship
+touches at least one board edge).
+
+Results, mean shots to sink (higher = better hiding):
+  Random placements vs edge-aware searcher:
+    72.19, median 75.0, SD 11.67, 95% CI +/-0.51 (n = 2,000)
+  Edge placements vs edge-aware searcher:
+    32.84, median 33.0, SD 4.69, 95% CI +/-0.21 (n = 2,000)
+  Unpaired difference, edge minus random, same searcher:
+    -39.35, 95% CI +/-0.55
+Reproduction check: edge vs edge-aware here is 32.84, against
+round-1's 32.97 on its own 2,000-placement sample. Consistent.
+Claim now supported, same searcher, same sample sizes:
+  Against an edge-aware searcher, an edge fleet (about 33 shots)
+  sinks far faster than a random fleet (about 72 shots).
+  Edge hiding is worse than a random fleet against that searcher.
+Claim NOT used (it mixes searchers, as Decoder flagged):
+  Comparing edge vs edge-aware (32.84) with random vs plain
+  density (44.68, verified core) or random vs line-bonus
+  (44.68, verified core) — those are different searchers and
+  must not be compared as if they were one test.
+Why random survives so long against the edge-aware searcher:
+  the searcher only counts edge-touching placements, so it
+  spends its early shots on the edges while a random fleet's
+  ships, which are usually not all on edges, sit elsewhere.
+  That is the cost of a searcher that commits to one hiding
+  theory. It is stated as the mechanism of the test, not as
+  a claim about real human opponents.
+
+================================================================
+3. DROP-RULE DEFINITION — ORIGIN-ONLY, MEASURED
+================================================================
+Script v2 defines the drop rule as: when a ship sinks, drop only
+the targets that ship created. A target that was also created by
+a different, still-unsunk hit is kept, even if it touches the
+sunk ship. That is the definition Decoder required, because
+ships may touch: a target touching a sunk ship can also be a
+neighbour of another unsunk hit, and the old wording ("drop
+every target touching it") clashed with "keep targets for a
+different unsunk hit" in exactly that case.
+Measured check, 10,000 fresh fleets, seed 20291120:
+  Centre-out rule, clear-adjacent version (the version in
+  verified-core.txt: drop stack entries adjacent to sunk cells):
+    54.35, median 54.0, SD 10.26, 95% CI +/-0.20
+  Centre-out rule, origin-only version (drop a stack entry only
+  if every ship that generated it is the sunk ship):
+    54.31, median 54.0, SD 10.18, 95% CI +/-0.20
+  Paired difference, origin-only minus clear-adjacent:
+    -0.04, 95% CI +/-0.03
+Reading: the origin-only wording describes the measured rule to
+within four hundredths of a shot. Script v2 therefore uses the
+origin-only definition, and quotes the verified clear-adjacent
+numbers (best human 54.45, verified core, 10,000 fleets, seed
+20291110; paired saving 6.72 against the verified baseline
+61.18). The 0.04-shot difference is not a new headline and is
+not quoted as one in the script.
+Spacing rule wording, corrected as Decoder required: the hunt
+widens as the smallest ship still afloat grows — after the
+two-square ship sinks, hunt every third square; after the
+three-square ships sink, hunt every fourth square. It is NOT
+"after the smallest sinks" without saying "still afloat",
+because the rule keys on the smallest ship that has not sunk.
+
+================================================================
+4. SAMPLE BOOKKEEPING FOR SCRIPT v2 (ALL SOURCES USED)
+================================================================
+Exact count: exact backtracking, C/OpenMP, 52.6 seconds
+(count_fleets.c/log). Reproduces BPK's reported figure
+30,093,975,536 exactly. Not a sample.
+Tournament ladder: production, 20,000 paired fleets, seed
+20291029 (numbers-log.txt). Random analytic 95.39 (exact,
+not sampled); Hunt+Target 66.36; Parity+Target 61.34;
+Density group-all 45.17.
+Human rule, line-bonus computer, hiding vs best searchers:
+verified core, 10,000 paired fleets / 10,000 placements per
+strategy, seed 20291110 (verified-core.txt). Best human
+54.45; baseline in that sample 61.18; paired saving 6.72;
+gap 16.21 to 9.49; density in that sample 44.97; line-bonus
+44.50 (paired -0.47 vs density in that sample); edge vs
+line-bonus 50.90; edge vs best human 59.57; interior vs
+line-bonus 37.34; interior vs best human 45.08.
+Hiding vs the older parity searcher: production, 10,000
+placements per strategy (numbers-log.txt), NOT the fresh
+verified test — spread 67.57, random 61.28, edge 60.98,
+corner 61.29. Labelled production in the script.
+Round-2 component figures: 3,000 paired fleets, seed
+20291102 (advanced-investigation-2.txt). Clear-adjacent
+alone about 4 shots saved; line-only about 2 more shots
+on top of centre+clear (56.77 to 54.61 in that sample);
+centre+clear without line-only 56.77. Used only where the
+script says "in the smaller round-2 sample".
+Round-1 figures: 3,000 paired fleets, seed 20291101
+(advanced-investigation.txt). Hybrid +11.73 vs density;
+entropy is round-2, see below. Round-1 placement x search
+game: 2,000 placements per strategy. Edge-aware 32.97 in
+round 1 is superseded for the counter-search claim by
+section 2 above (32.84, same searcher, with random 72.19).
+Rollout: 100 fleets, first 10 shots only, round 2
+(advanced-investigation-2.txt). Paired difference +1.40,
+CI +/-1.90, includes zero — inconclusive, point estimate
+worse. Never described as a loss for counting.
+Joint count timing: one mid-game DP count, 13.72 seconds
+(advanced-investigation-2.txt). One shot needs about 100
+such counts. Exact counting was never run as a per-shot
+strategy at scale. Never described as losing to counting.
+Engine-derived figures in this log and in the script are
+traced to the samples above. They were NOT independently
+recomputed by Decoder from code; he verified only that
+they are internally consistent, plus the exact count,
+heatmap, placements, random baseline, and subtractions
+listed in his verdict. The script must not present engine
+figures as independently recomputed.
+
+================================================================
+V3 APPENDIX — 2026-10-30, script v3 checks (script-v3.txt)
+================================================================
+Purpose: resolve the v2 verdict items that depended on code, before v3
+was written. Source script: v3_check.py in this folder, output v3_check.json.
+All runs below use code already in this folder (engine.py, advanced2.py,
+verify_core.py sample reproduction, example_counter_run.py origin function).
+
+1. ORIGIN-ONLY vs CLEAR-ADJACENT, VERIFIED FLEETS (seed 20291110, N=10,000)
+   Centre-parity hunt + line-only, same fleets for both versions.
+   Clear-adjacent: mean 54.4539, median 54.0, CI +/-0.21 (verified-core figure).
+   Origin-only:    mean 54.4011, median 54.0, CI +/-0.20.
+   Paired origin minus clear: -0.0528, CI +/-0.0287.
+   Paired origin minus baseline Parity+Target: -6.7774, CI +/-0.2635.
+   Paired clear minus baseline (verified core): -6.7246, CI +/-0.2653.
+   Conclusion for v3: the difference is NOT material (0.05 shots).
+   V3 step 4 is origin-only throughout, and the quoted human figure is the
+   origin-only figure 54.40 (verified fleets), NOT 54.45. 54.45 remains the
+   clear-adjacent verified figure and is not quoted as the origin figure.
+   Gap note: origin 54.40 vs verified density 44.97 is about nine shots;
+   two-fifths check: 6.78 / 16.21 = 41.8%, so "about two-fifths" still holds.
+
+2. MEMORY (SPACING) VERSION, VERIFIED FLEETS (seed 20291110, N=10,000)
+   Spacing hunt + line-only + clear-adjacent: 55.7713, CI +/-0.23.
+   Spacing hunt + line-only + origin-only:   55.7627, CI +/-0.23.
+   Paired origin minus clear for spacing: -0.0086, CI +/-0.0226.
+   Paired spacing-origin minus baseline: -5.4158, CI +/-0.2969.
+   Cost of spacing-origin vs centre-origin: 55.7627 - 54.4011 = 1.3616,
+   i.e. "a shot and a third" still holds for the verified sample.
+   Spacing definition (advanced2.py): hunt squares with (row+col) % m == 0,
+   where m = smallest ship still afloat; order RANDOM within that pattern
+   (spacing_random), rebuilt when m changes. Starts m=2 (checkerboard),
+   after the 2-ship sinks m=3, after the 3-ships sink m=4, then m=5 if only
+   the carrier remains. It is NOT centre-ordered (spacing_centre is a
+   different arm, round-2 55.389 on 3,000 fleets, NOT the verified figure).
+   Composition (round-2 components, 3,000 fleets, labelled): random-parity
+   + clear-adjacent (no line) 57.655; spacing_random + clear-adjacent
+   (no line) 57.409; spacing_random + clear-adjacent + line-only 55.522.
+   So widening alone (spacing vs random checkerboard, same drop) is about
+   0.25 shots by means, NOT about five shots. The memory version's saving
+   is drop (about 4) + line (about 2) + spacing (about 0.25) together.
+   V3 states this composition and never claims widening alone is worth
+   about five shots.
+
+3. EXAMPLE 300-FLEET ARM MEANS, UNROUNDED (seed 20291120, N=300)
+   Random:       mean 95.4000, median 97.0, SD 4.49, CI +/-0.51.
+   Parity+Target: mean 61.3767, median 62.0, SD 8.54, CI +/-0.97.
+   Density:       mean 45.6967, median 44.0, SD 9.52, CI +/-1.08.
+   Best human centre+line (clear-adjacent in the example run):
+                 mean 54.4533, median 53.0, SD 10.72, CI +/-1.21.
+   Verified 10,000-fleet centre+line clear-adjacent mean: 54.4539.
+   The 300-fleet mean (54.4533) and the verified mean (54.4539) round to
+   the same 54.45 BY COINCIDENCE. They are different samples and v3 labels
+   them separately: example chapter means are 300-fleet means, the named
+   rule figure is the verified 10,000-fleet origin figure 54.40.
+   Example fleet counts, one game each (unchanged from v2): Random 96,
+   Parity+Target 62, Density 43, centre-out best human 54. Origin-only
+   re-run on the chosen example fleet also gives 54, so the example count
+   is the same under the v3 origin wording. Fleet gap 11 (54-43) vs
+   average gap over 300 fleets about 9 (54.45-45.70 = 8.75): the fleet
+   slightly flatters the computer, and v3 says so.
+
+4. REAL NON-NEIGHBOUR DENSITY STATE (replaces the v2 Ch6 scenario)
+   Found by scanning density games (fleet sampling seed 20291110, game 6).
+   Fleet: Carrier col 6 rows 4-8 [35,45,55,65,75]; Battleship row 9 cols 7-10
+   [86,87,88,89]; Cruiser row 3 cols 1-3 [20,21,22]; Submarine row 6 cols 2-4
+   [51,52,53]; Destroyer col 2 rows 4-5 [31,41]. (1-indexed rows/cols.)
+   State at decision point: unsunk hits [87] (row 9, col 8); misses
+   [4,11,13,16,23,25,32,39,42,44,47,58,60,66,84,93]; sunk cells
+   [20,21,22,31,35,41,45,51,52,53,55,65,75]; remaining lengths [4] only.
+   Group-all marginal placement-count scores: next shot chosen 67
+   (row 7, col 8), score 2. Unshot neighbour scores of hit 87: 88: 2,
+   86: 2, 77: 2, 97: 1. The chosen square 67 ties the neighbours on count
+   and wins the centre tie-break (nearest to centre). The square between
+   the hit and the chosen shot, 77 (row 8, col 8), also scores 2, so there
+   is NO dark intermediate square on that line: any placement reaching 67
+   and covering the hit 87 also covers 77. This is the honest version of
+   the neighbour story used in v3 Ch6: neighbours glow too, and the
+   computer sometimes steps past them on a tie. The v2 scenario (dark
+   neighbour next to a glowing farther square on the same line) is NOT
+   used; it is geometrically impossible as written.
+
+5. CENTRE-OUT HUNT ORDER (from code, for v3 Ch8)
+   advanced2.py play_human, hunt_mode='centre_parity': candidates are
+   black squares only, (row+col) % 2 == 0, sorted by DIST2 then row-major
+   index q. engine.py DIST2 = (row-4.5)^2 + (col-4.5)^2 (0-indexed).
+   In 1-indexed rows/cols, first squares in order: row 5 col 5, row 6 col 6,
+   row 4 col 6, row 5 col 7, row 6 col 4, row 7 col 5, then row 4 col 4,
+   row 7 col 7, and so on, nearest to the centre first, ties by earlier
+   row then earlier column. This order IS precisely statable and
+   reproducible, so v3 keeps centre-out as the named best human rule
+   (task option a) and the printed diagram is a drawing of this order,
+   not an extra rule and not a count table.

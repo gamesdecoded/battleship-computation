@@ -1,0 +1,199 @@
+humandecoded — BATTLESHIP COMPUTATION TEST — VERIFIED CORE
+Production-scale verification of the round-2 core claims.
+Date: 2026-10-29 (evening, PKT). This file does NOT replace
+numbers-log.txt or results.json. Locked production numbers
+(20,000 fleets, seed 20291029) are unchanged. The numbers
+below are a separate, fresh verification run.
+
+RUN IDENTIFICATION
+Engine: engine.py (production) + advanced2.py (round-2 arms),
+both unchanged, in this folder.
+Fresh seed: 20291110 (distinct from production 20291029,
+benchmark 20261029, round-1 20291101, round-2 20291102).
+Tournament: 10,000 paired fleets, same fleets across all
+arms in this run.
+Placement: 10,000 placements per strategy, same strategies
+as production (P-random, P-edge, P-corner, P-interior,
+P-spread; definitions in engine.py / definition-sheet.txt).
+Runtime: 663.8 seconds (11.1 minutes), verified_core_run.log.
+CI method: mean +/- 1.96 x SD / sqrt(n). Paired differences
+use the same fleets. Placement strategy-vs-strategy
+differences are UNPAIRED (different fleets per strategy).
+Metric: single-player shots to sink the whole fleet.
+Lower shots = better SEARCH. Higher shots = better HIDING.
+Sunk detection: true-ship sunk announcement (see wording
+corrections at the end of this file).
+
+VERDICT — STEP 1 HOLDS
+The round-2 core holds at production scale. The best human
+rule improves on the baseline by several shots, CI-separated.
+Script stage is therefore authorised on these verified
+numbers (not on the round-2 3,000-fleet numbers where they
+differ). Do NOT claim a computer headline, do NOT claim
+"beats BPK", "optimal", "perfect hiding", or "unexploitable".
+
+TOURNAMENT — VERIFIED CORE (10,000 paired fleets)
+Density, group-all marginal placement-count:
+  Mean 44.97, median 44.0, SD 8.82, 95% CI +/-0.17
+  (Production, 20,000 fleets: 45.17 +/-0.12. Same rule,
+  different sample. Production numbers govern for the
+  locked tournament; this run is the verification sample.)
+Line-bonus density (best computer):
+  Mean 44.50, median 44.0, SD 8.93, 95% CI +/-0.18
+  Paired vs density: -0.47, CI +/-0.07
+  Reading: a real half-shot refinement, NOT a material
+  headline, NOT a claim against BPK. BPK's reported
+  greedy figure (about 45, rounded, no CI, unpaired)
+  cannot be beaten or tied by a paired claim from
+  this run. Quote the paired difference (-0.47) if
+  line-bonus is quoted, not an unpaired BPK comparison.
+Parity+Target, baseline human rule (production engine):
+  Mean 61.18, median 62.0, SD 8.66, 95% CI +/-0.17
+  Paired vs density: +16.21, CI +/-0.24
+  (Production, 20,000 fleets: 61.34 +/-0.12, paired gap
+  +16.17. Consistent.)
+Parity+Target, round-2 reproduction (advanced2.py):
+  Mean 61.18, median 62.0, SD 8.66, 95% CI +/-0.17
+  Identical mean to the production engine on this sample
+  (same hunt shuffle seed, same stack logic for the
+  non-line-only case). The two baselines agree, which
+  is why the best-human paired difference is the same
+  against either baseline.
+BEST HUMAN RULE — VERIFIED (centre checkerboard hunt,
+line-only after two collinear hits, drop-around-sunk):
+  Mean 54.45, median 54.0, SD 10.46, 95% CI +/-0.21
+  Paired vs density: +9.49, CI +/-0.22
+  Paired vs baseline Parity+Target: -6.72, CI +/-0.27
+    (paired median difference -8.0 shots)
+  Reading: MATERIAL and CI-separated. The human gap to
+  the computer falls from 16.21 shots (baseline) to
+  9.49 shots (best human) in this sample. Round 2 on
+  3,000 fleets gave 54.61, paired -6.87 vs its baseline;
+  verification on 10,000 fleets gives 54.45, paired
+  -6.72. Use the VERIFIED numbers in the script
+  (about 61 to about 54, about 7 shots saved), not
+  the round-2 numbers, where they differ.
+  The human rule does NOT reach the computer: 54.45
+  vs density 44.97 in this sample, still about 9.5
+  shots behind. Never present the human rule as
+  getting 45 shots.
+Memory-friendly human rule (spacing version, verified):
+  Mean 55.77, median 55.0, SD 11.82, 95% CI +/-0.23
+  Paired vs density: +10.80, CI +/-0.29
+  (Round 2, 3,000 fleets: 55.52. Verification: 55.77.
+  Cost of memorability vs the centre version:
+  about 1.3 shots in this sample, 55.77 - 54.45.)
+  Present the centre version as best, and the spacing
+  version as the version you can play from memory.
+  Do not present them as the same rule.
+Random baseline (analytic, exact, not sampled):
+  95.39 shots (17 x 101 / 18). Use this in the script.
+  (Production sampled check: 95.45 on 20,000 fleets.)
+
+PLACEMENT vs BEST SEARCHERS — VERIFIED (10,000 per strategy)
+Higher shots = better hiding. Strategy differences below
+are unpaired vs P-random, same searcher.
+Against line-bonus density (best computer):
+  P-random:   44.68, CI +/-0.17
+  P-edge:     50.90, CI +/-0.16  (+6.22 vs random, +/-0.23)
+  P-corner:   48.51, CI +/-0.16  (+3.83 vs random, +/-0.24)
+  P-interior: 37.34, CI +/-0.18  (-7.34 vs random, +/-0.25)
+  P-spread:   45.86, CI +/-0.16  (+1.18 vs random, +/-0.24)
+  Best vs best computer: EDGE. Worst: interior.
+Against best human rule (centre, line-only, clear-adjacent):
+  P-random:   54.68, CI +/-0.20
+  P-edge:     59.57, CI +/-0.19  (+4.88 vs random, +/-0.28)
+  P-corner:   59.33, CI +/-0.15  (+4.65 vs random, +/-0.25)
+  P-interior: 45.08, CI +/-0.25  (-9.61 vs random, +/-0.32)
+  P-spread:   55.62, CI +/-0.11  (+0.93 vs random, +/-0.23)
+  Best vs best human: edge, essentially tied with corner
+  (edge - corner = +0.24, unpaired CI about +/-0.24 to
+  +/-0.28, not cleanly separated — present edge and
+  corner as tied at the top vs a human). Worst: interior,
+  by a wide margin.
+Against plain density, for reference (same sample):
+  P-random 45.15, P-edge 51.88 (+6.74), P-corner 48.95
+  (+3.81), P-interior 37.48 (-7.67), P-spread 46.53 (+1.39).
+  (Production, 10,000 per strategy, different sample:
+  edge 51.98, corner 49.15, interior 37.54, spread 46.45,
+  random 45.11 — consistent.)
+Counter-search limit, carried from round 1 (NOT retested
+in this verification run, do NOT quote as tested against
+line-bonus or the best human):
+  Edge collapses vs an edge-aware counter-searcher
+  (round 1, 2,000 placements: edge-aware density 32.97,
+  far below random). Edge is best vs the best searcher
+  that does NOT know your rule. Once the opponent knows
+  you hide on edges, edge is worse than random. Every
+  hiding claim in the script must name its opponent.
+  The round-1 mixed edge/corner answer (worst case
+  50.72 vs density / edge-aware / parity) was NOT
+  retested vs line-bonus or the best human, so it is
+  NOT quoted as tested against the new best searcher.
+
+DEAD ENDS — CARRIED FROM ROUNDS 1 AND 2 (not re-run here)
+Hybrid density hunt + explicit target stack: +11.73 vs
+density (round 1, 3,000 fleets) — worse, dead end.
+Entropy / information-gain search: +29.41 vs density
+(round 2, 3,000 fleets) — much worse, dead end.
+Rollout / lookahead, first 10 shots only, 100 fleets:
++1.40, CI +/-1.90 (includes zero, point estimate worse).
+Joint exact density at 10x10: infeasible per shot on the
+DP prototype (13.72 seconds for ONE mid-game count;
+about 100 counts needed per shot), and no gain on the
+only paired proxy (small board, round 1). Dead end as
+a tournament upgrade. Do not claim joint, entropy, or
+rollout as better core answers.
+
+WORDING CORRECTIONS — SEPARATE NOTE, NOT A SILENT EDIT
+The definition sheet (definition-sheet.txt) is NOT edited
+by this file. Two wording issues in the sheet are corrected
+here, and must be corrected in the sheet itself before a
+final publishable methods note is issued:
+1. Sunk detection (sheet section 6): the sheet phrases
+   sunk length as "inferred from the size of the
+   contiguous hit group". Code in engine.py, advanced2.py,
+   and this verification run uses true-ship sunk
+   announcement: a ship is sunk when all its cells are
+   shot, and the defender names the sunk ship. These
+   coincide when a hit group is a single ship. When two
+   ships touch and their hit cells merge, group-size
+   inference is ambiguous (group size is not sunk ship
+   length), so true-ship detection is used. A script
+   must use sunk-announcement wording, never claim
+   group-size inference literally.
+2. Placement "better" (sheet section 10): the sheet says
+   "lower = better placement" for average shots to sink.
+   That line is INVERTED for a hiding strategy and is
+   NOT followed here or in numbers-log.txt. For hiding,
+   higher shots = better hiding (the fleet survives
+   longer), lower shots = worse hiding. Evidence in
+   this run: interior 37.34 vs line-bonus, edge 50.90
+   vs line-bonus — centre hiding is searched first, so
+   it is worse, not better.
+
+SCRIPT NUMBERS — WHICH SAMPLE TO USE
+Locked tournament (script ladder): numbers-log.txt,
+20,000 fleets, seed 20291029 — Random analytic 95.39,
+Hunt+Target 66.36, Parity+Target 61.34, Density 45.17.
+Verified core (script human rule, line-bonus, hiding
+vs best searcher): this file, 10,000 fleets, seed
+20291110 — best human 54.45 (paired -6.72 vs baseline
+61.18 in this sample), line-bonus 44.50 (paired -0.47
+vs density 44.97 in this sample), edge vs line-bonus
+50.90, edge vs best human 59.57, interior vs line-bonus
+37.34, interior vs best human 45.08.
+When a script sentence gives a mean, it must give its
+sample size. Do not mix samples in one sentence without
+saying the samples differ. Round-2 3,000-fleet numbers
+(54.61, 44.79, 50.75, 59.65) are superseded by the
+verified numbers above for script use.
+
+FILES
+verify_core.py — this verification run (in this folder).
+verified_core.json — full verified numbers, sample sizes,
+seed, paired and unpaired differences, runtime.
+verified_core_run.log — console log of this run.
+numbers-log.txt — locked production log, unchanged except
+for the appended verified-core section dated 2026-10-29.
+results.json — locked production results, NOT changed.

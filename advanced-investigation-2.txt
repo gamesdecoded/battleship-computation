@@ -1,0 +1,348 @@
+ADVANCED-BEYOND-BPK INVESTIGATION, ROUND 2 — CORE ONLY
+humandecoded, Battleship computation test
+Date of runs: 2026-10-29 (evening, PKT)
+Status: BONUS / ADVANCED arms only. Locked primary production numbers in
+results.json and numbers-log.txt were NOT changed.
+Primary production (locked, 20,000 paired fleets, seed 20291029):
+  Density group-all placement-count: 45.17 mean, 45.0 median, CI +/-0.12.
+  Parity+Target (human baseline): 61.34 +/-0.12.
+  Hunt+Target: 66.36 +/-0.18. Random analytic baseline: 95.39 shots.
+BPK comparison throughout is UNPAIRED and flagged: BPK's fleets, seeds and
+exact density formula are not public, and BPK's figures are rounded with no
+CI (greedy about 45 in the video material; BPK's own Substack, as audited
+separately, reports greedy 44.7 mean vs checkerboard-greedy 45.4 — a
+BPK-reported figure, not a humandecoded measurement, and not paired with
+our fleets). No "beats BPK" claim is made on an unpaired level comparison
+alone. "Material" means several shots, CI-separated, not a fraction of a shot.
+
+FOCUS (Decoder's clarification, overriding the broader round-2 scope):
+Make better THE THING people came to BPK for — the definitive answer to
+"what is the best way to play Battleship?": best computer search, best
+human-usable rule, best hiding vs the best searcher. Side angles were
+deprioritised. Human placement-dataset hunting and literature survey for
+its own sake were deprioritised; literature is reported only where it
+bears on the core (section 5).
+
+METHOD
+- Round-2 core arms: 3,000 paired fleets, fresh seed 20291102 (distinct
+  from production 20291029, benchmark 20261029, round-1 20291101), same
+  fleets across computer and human arms in advanced2.py, so paired
+  differences within that sample are valid. On these 3,000 fleets the
+  density reference is 45.29 mean (vs production 45.17 on 20,000 fleets —
+  a different sample, so paired differences are the honest comparison).
+- CI method: mean +/- 1.96 x SD / sqrt(n); paired differences use the
+  same fleets. "Material" = several shots, CI-separated.
+- Rollout: 100 fleets (first 100 of the same 3,000-fleet set, so paired
+  with density on that subset), first 10 shots only, top-3 density
+  squares, M=6 sampled fleets consistent with shots so far, density
+  continuation to completion. Sampling is approximate (per-ship
+  sequential, hit-guided; not an exact posterior) — flagged, not hidden.
+- DP joint: row-by-row profile DP prototype, timed on realistic
+  mid-game states captured from a density game. One DP count, not a
+  tournament.
+- Placement vs best: 2,000 placements per strategy, seed 20291103,
+  same strategies as production (P-random, P-edge, P-corner,
+  P-interior, P-spread, definitions in engine.py / definition sheet).
+  Strategy-vs-strategy differences are UNPAIRED (different fleets per
+  strategy); CIs below for those are unpaired.
+- Sunk detection throughout: true-ship sunk announcement, as in
+  production (see production deviation 1).
+
+========================================================================
+1. BEST COMPUTER SEARCH — judged only by paired shots to sink vs density
+========================================================================
+All on the same 3,000 paired fleets (density reference 45.29 in sample):
+
+  Density group-all (reference):  45.29 mean, 45.0 median, CI +/-0.32
+  Line-bonus density:             44.79 mean, 44.0 median, CI +/-0.32
+    paired diff vs density:       -0.50 +/-0.12  (small, real, NOT material)
+  Entropy / information-gain:     74.70 mean, 80.0 median, CI +/-0.71
+    paired diff vs density:       +29.41 +/-0.70  (MUCH WORSE)
+  Blend density+entropy:          45.42 mean
+    paired diff vs density:       +0.13 +/-0.21  (no gain)
+  Blend entropy+line-bonus:       45.33 mean
+    paired diff vs density:       +0.05 +/-0.20  (no gain)
+
+Line-bonus definition (same as round 1, re-measured here): after two or
+more collinear unsunk hits, the two line-extension squares are forced
+first, ranked by placement count among themselves. It is a refinement
+of density, not a new strategy class.
+
+Rollout / lookahead (first 10 shots only, top-3, M=6, 100 fleets):
+  Density on same 100 fleets:     45.29 mean (see rollout100.json)
+  Rollout first-10:               46.69 mean, 46.0 median, CI +/-1.83
+    paired diff vs density:       +1.40 +/-1.90  (CI includes zero,
+                                  point estimate WORSE)
+  Cost: about 1 second per game for first-10 rollout (vs about 0.003
+  seconds per density game). A full-game rollout at this cost would be
+  about 4-5 seconds per game, and the first-10 version already shows
+  no gain, so scaling it up is not justified on this evidence.
+  Two implementation lessons, recorded honestly:
+  (a) A sampled fleet whose remaining ship is already fully shot
+      (all its cells are hits) makes density continuation loop forever,
+      because that ship can never be sunk by a new shot. The sampler
+      now rejects such fleets, and density continuation has a 100-shot
+      safety cap. The first rollout runs that stalled were this bug,
+      not a slow computer — the bug was fixed, not hidden.
+  (b) Rollout sampling is approximate, not exact posterior. A future
+      exact-posterior rollout could in principle differ, but it would
+      need to beat this implementation by more than 1.4 shots just to
+      break even, and by several shots to be material — no evidence
+      for that is in hand.
+
+DP joint counting (profile DP, one count):
+  Mid-game stop-10 (4 ships remaining, 6 misses, 1 unsunk hit, 3 sunk
+    cells): count 150,253,569 consistent fleets, 261,541 DP states,
+    13.72 seconds for ONE count.
+  Mid-game stop-20 (3 ships remaining, 14 misses, 1 unsunk hit, 5 sunk
+    cells): count 651,896 consistent fleets, 8,363 states, 0.31 seconds
+    for ONE count.
+  Empty board (all 5 ships, no shots): NOT finished in over 120 seconds
+    (state explosion, killed, not extrapolated as a measurement).
+  Verdict: a joint shot needs about 100 such counts (one per candidate
+  square, to get occupancy marginals). Even at the favourable 0.31
+  seconds per count that is 31 seconds per shot and about 23 minutes
+  per game; at the stop-10 13.72 seconds per count it is 22 minutes
+  per shot. Joint is INFEASIBLE as a per-shot strategy on this DP,
+  and the only paired joint evidence (small-board proxy, round 1:
+  joint 22.42 vs marginal 21.86, diff -0.56 +/-1.17) shows no gain.
+  Do NOT claim joint as a better core answer.
+
+COMPUTER VERDICT: NO material computer improvement was found.
+Best computer search = line-bonus density at 44.79 on 3,000 fleets,
+-0.50 vs greedy in the same sample. That is essentially AT BPK's
+reported 44.7 (unpaired, rounded, no CI), not materially below 45.
+Greedy density is not proven optimal in general — most-likely-next-
+square is not the same as fewest-total-shots — but none of the
+tested non-greedy optimisers (rollout, entropy, blend, joint) beat
+it by a material margin in this round. Say that plainly; do not
+relabel a 0.5-shot refinement as a new best strategy.
+
+========================================================================
+2. BEST HUMAN-USABLE RULE — a rule a human can play by hand, no table
+========================================================================
+Human baseline (production, reproduced on the round-2 sample):
+  Parity+Target (random parity hunt, locked target stack):
+    61.48 mean, 63.0 median, CI +/-0.31 on 3,000 fleets
+    (production 61.34 on 20,000 fleets; same rule, different sample)
+    Paired gap to density in this sample: +16.20 +/-0.45
+
+New human arms, same 3,000 fleets (all paired vs density in sample):
+  Parity+Target, clear-adjacent on sink only:
+    57.66 mean, paired vs density +12.37 +/-0.48
+    (clear-adjacent = when a ship sinks, drop stack entries that
+    touch the sunk ship; keep neighbours of other unsunk hit groups.
+    This alone is worth about 3.8 shots vs the locked stack, which
+    kept probing around a sunk ship.)
+  Centre-parity + clear-adjacent:
+    56.77 mean, paired vs density +11.48 +/-0.40
+  Spacing-random + clear-adjacent:
+    57.41 mean, paired vs density +12.12 +/-0.49
+    (spacing = hunt squares (row+col) % m == 0, where m = smallest
+    remaining ship length; m grows as ships sink, so the hunt board
+    widens from checkerboard to every-third to every-fourth square.)
+  Spacing-random + clear-adjacent + line-only:
+    55.52 mean, paired vs density +10.23 +/-0.53
+    (line-only = after two hits in a line, shoot only the two line
+    extensions, ignore side neighbours until the ship sinks.)
+  Spacing-centre + clear-adjacent + line-only:
+    55.39 mean, paired vs density +10.10 +/-0.44
+  Centre-parity + clear-adjacent + line-only  [BEST HUMAN]:
+    54.61 mean, 54.0 median, CI +/-0.36
+    paired vs density +9.32 +/-0.41
+    vs baseline parity+target: 54.61 - 61.48 = -6.87 shots
+    (conservative unpaired CI on that difference: +/-0.48; the
+    fleets are the same, hunt randomness differs for the random arm,
+    so the paired CI would be tighter, not looser)
+
+Component checks (same sample, to show what each piece is worth):
+  Centre-parity + clear-all + line-only: 55.20 (clear-all is 0.59
+    worse than clear-adjacent — keeping other groups' neighbours
+    matters).
+  Centre-parity + clear-none + line-only: 57.28 (without clearing,
+    line-only alone is worth about 4.2 vs baseline, but clearing is
+    worth more).
+  Centre-parity + clear-adjacent, no line-only: 56.77 (line-only is
+    worth 2.16 on top of centre+clear: 56.77 -> 54.61).
+
+BEST HUMAN RULE, in plain playable steps (centre version, 54.61):
+  1. Hunt on black squares only — the checkerboard, (row+col) even.
+     Start in the centre and work outward. (A printed centre-outward
+     checkerboard diagram is the honest human form of this step; it
+     is not a table you recompute each shot.)
+  2. On a hit, shoot its neighbours.
+  3. When you have two hits in a line, shoot ONLY the two ends of
+     the line. Ignore the side neighbours until that ship sinks.
+  4. When a ship sinks, stop shooting around it. Drop every target
+     square that touches the sunk ship, and go back to hunting.
+     Keep targets that belong to a different, still-unsunk hit.
+  That is it. No density table, no computer, no recomputation.
+
+Most memory-friendly human rule (no centre diagram needed):
+  Spacing + clear-adjacent + line-only, 55.52 mean:
+  1. Hunt on the checkerboard.
+  2. Every time the smallest remaining ship sinks, widen the hunt:
+     after the 2-ship sinks, hunt every third square; after the
+     3-ships sink, every fourth square. (Every remaining ship must
+     cover one such square, so you cannot miss a ship by widening.)
+  3-4. Same line-only and drop-around-sunk rules as above.
+  Cost of memorability: 55.52 - 54.61 = +0.91 shots (paired
+  -0.92 +/-0.53 for centre-best minus spacing-line-only, i.e. the
+  centre version is better by about 0.9, CI-separated but small).
+  Present the centre version as best, and the spacing version as
+  the version you can play from memory — do not present them as
+  the same rule.
+
+HUMAN VERDICT: MATERIAL improvement, and the strongest core win in
+this round. The human gap to the computer falls from 16.20 shots
+(61.48 vs density 45.29 in sample) to 9.32 shots (54.61 vs 45.29).
+The human rule does NOT reach the computer (54.61 vs 45.29, still
+9.3 behind), and must not be presented as if a human playing it
+gets 45 shots. What it does is close almost half the gap — 6.9
+shots — with four memorable steps. That is viewer-facing: it is
+what people came to BPK to take away and use in a real game, and
+it is better than BPK's human takeaway as measured here (BPK's
+human rule in the material read was parity hunt/target, the
+61.34 baseline; BPK's own checkerboard-greedy figure is a
+computer rule, not a human rule, and must not be compared to
+54.61 as if it were).
+
+========================================================================
+3. BEST HIDING vs THE BEST SEARCHER
+========================================================================
+Best computer searcher from (1) is line-bonus density (44.79 on
+3,000 fleets; on the placement sample below, random fleets take
+44.52 vs line-bonus). Placement, 2,000 per strategy, seed 20291103,
+higher shots = better hiding (fleet survives longer):
+
+  Placement   vs density  vs line-bonus  vs best human*
+  P-random       44.92         44.52          54.80
+  P-edge         52.00         50.75          59.65
+  P-corner       48.82         48.33          59.41
+  P-interior     37.63         37.52          45.09
+  P-spread       46.59         45.89          55.80
+  (* best human = centre-parity + clear-adjacent + line-only, 54.61
+  on random fleets in the tournament sample; 54.80 here on the
+  placement sample's random fleets — different sample, same rule.)
+
+Unpaired differences vs P-random (same searcher, different fleets):
+  vs line-bonus: edge +6.23 +/-0.52, corner +3.81 +/-0.52,
+    interior -7.00 +/-0.55, spread +1.37 +/-0.52.
+  vs best human: edge +4.85 +/-0.61, corner +4.62 +/-0.57,
+    interior -9.70 +/-0.71, spread +1.00 +/-0.52.
+  vs density (for reference): edge +7.09, corner +3.91,
+    interior -7.28, spread +1.68 (all +/- about 0.5).
+
+HIDING VERDICT: BEST hiding vs the best searcher is EDGE.
+  - vs best computer (line-bonus): edge 50.75, best of all five
+    strategies, +6.23 over random. The edge advantage shrinks vs
+    line-bonus (from +7.09 vs plain density) because line-bonus
+    finds edge fleets slightly faster, but edge still wins.
+  - vs best human: edge 59.65, essentially tied with corner 59.41
+    (difference +0.24, unpaired CI about +/-0.53 — not separated).
+    Present edge and corner as tied at the top vs a human, not
+    edge alone as a clear winner vs a human.
+  - Worst case across the three searchers tested here (density,
+    line-bonus, best human): edge 50.75, corner 48.33, spread 45.89,
+    random 44.52, interior 37.52. Edge has the best worst case
+    among pure strategies on this set.
+  - Interior is the WORST hiding vs every searcher, and worst of
+    all vs the best human (45.09, -9.70 vs random) — because a
+    centre-first human hunts the interior first. Do not ever
+    recommend interior hiding.
+  - Limit, carried from round 1: edge collapses vs an edge-AWARE
+    counter-searcher (round 1: edge-aware density 32.97, far below
+    random). Edge is best vs the best searcher that does NOT know
+    your rule; once the opponent knows you hide on edges, edge is
+    worse than random. The hiding answer must state the opponent.
+    The round-1 mixed edge/corner answer (worst case 50.72 vs
+    density / edge-aware / parity) was NOT retested vs line-bonus
+    or vs the best human in this round, so do not quote it as
+    tested against the new best searcher.
+
+========================================================================
+4. WHAT WAS NOT TESTED / REMAINS UNPROVEN
+========================================================================
+- Exact-posterior rollout (vs the approximate sampler used here):
+  untested. The approximate rollout shows no gain (+1.40 +/-1.90
+  on 100 fleets, first 10 shots only); an exact version would need
+  to beat that by several shots to be material, and would cost far
+  more per game. Do not claim it as a future win, only as untested.
+- Mixed counter-searchers vs the new best human / line-bonus:
+  untested. No equilibrium claim is made in this round either.
+- A joint tournament at 10x10: infeasible on the DP prototype
+  (section 1). The DP count itself is exact (stop-10 count
+  150,253,569 and stop-20 count 651,896 are exact counts for those
+  states, given the blocked/hit inputs), but a per-shot joint score
+  is not feasible, so joint is not a core answer.
+- Rollout beyond the first 10 shots, rollout with larger M or k:
+  untested. The first-10 scope was chosen for cost; a full-game
+  rollout could differ, but the first-10 result gives no reason
+  to expect a several-shot gain, and the cost is about 300x
+  density per game.
+
+========================================================================
+5. LITERATURE (deprioritised, reported only where it bears on core)
+========================================================================
+Web search for optimal / expected-shots-minimising Battleship
+strategies found no citable, paired, implementable algorithm that
+beats greedy density by a material margin:
+  - General guides (e.g. blinky.games strategy/history pages) claim
+    density "about 40" and parity "about 50" — different models,
+    and in one case medians mixed with means (DataGenetics medians
+    must never be mixed with means; see the separate reference
+    audit). Those figures are NOT a paired test vs our density
+    and must not be cited as beating 45.17.
+  - A POMDP framing (Battleship as a partially observable search,
+    optimal policy = posterior belief over layouts, minimising
+    expected shots to win) is the correct theory, but the sources
+    found do not give an implementable policy that beats greedy
+    density on 10x10 — they state the objective, not a better
+    algorithm. Cited as theory, not as a tested improvement.
+  - An older strafing / search-and-destroy algorithm (academia.edu
+    paper) averaged 48.9 shots vs an opponent's 49.5 in 32 test
+    games — worse than density 45.17, and on a tiny sample. Not
+    a better core answer.
+No literature-backed arm was therefore added beyond rollout,
+entropy and DP-joint, which were the literature's own candidates
+(lookahead, information gain, exact posterior) — and all three
+were tested paired and did not beat greedy materially.
+
+========================================================================
+FINAL — SINGLE BEST CORE CLAIM (after BOTH rounds)
+========================================================================
+Computer best:  line-bonus placement-count density.
+  44.79 on 3,000 fleets, -0.50 +/-0.12 vs greedy density in the
+  same sample. Essentially AT BPK's reported 44.7 (unpaired),
+  NOT materially below 45. No computer headline.
+Human best:     centre checkerboard + line-only + drop-around-sunk.
+  54.61 on 3,000 fleets, -6.87 vs the 61.48 parity+target baseline
+  in the same sample, gap to the computer cut from 16.20 to 9.32.
+  This IS the material core improvement, and it is for humans.
+Hiding best:    edge, vs the best searcher.
+  vs best computer (line-bonus) 50.75 (+6.23 vs random);
+  vs best human 59.65 (+4.85 vs random, tied with corner 59.41);
+  interior is worst vs every searcher (37.52 vs line-bonus,
+  45.09 vs best human). State the opponent with every hiding
+  claim; edge collapses vs an edge-aware counter (round 1: 32.97).
+
+Honest headline wording (do not strengthen):
+  "The computer's best guess got a little better — half a shot.
+   The rule you can actually play got a lot better: from about
+   61 shots to about 55, by hunting centre-out on the checkerboard,
+   following a line to its ends, and stopping around a sunk ship.
+   And if you hide, hide on the edges — unless your opponent
+   knows you do, in which case it is the worst place to hide."
+
+Wording that must NOT be used:
+  "Our strategy beats BPK" / "faster than BPK's 45" / "the optimal
+  strategy" / "the perfect hiding strategy" / "unexploitable" /
+  "a human playing our rule gets 45 shots" / "joint probability
+  beats density" (untested at scale, no gain on the only paired
+  proxy) / "entropy / lookahead beats greedy" (tested: entropy
+  +29.41, rollout +1.40, both worse, not better).
+
+Files: advanced2.py, advanced2_rollout_dp.py, advanced2_core.json,
+rollout100.json, placement_vs_best.json in this folder.
+Primary numbers in results.json / numbers-log.txt were not changed.
+No script, voiceover, video or thumbnail work was done in this round.

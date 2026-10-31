@@ -1,0 +1,17 @@
+[tournament] sampling 20000 fleets, seed 20291029
+[tournament] fleets sampled in 0.6s
+[tournament] Random done 0.9s
+[tournament] Hunt+Target done 3.2s
+[tournament] Parity+Target done 3.1s
+[tournament] Density done 61.7s
+[placement] 10000 placements per strategy
+[placement] P-random done dens 31.2s parity 1.5s
+[placement] P-edge done dens 69.8s parity 3.1s
+[placement] P-corner done dens 79.6s parity 4.2s
+[placement] P-interior done dens 56.8s parity 3.6s
+[placement] P-spread done dens 74.7s parity 4.3s
+Wrote /home/hatch/workspace/sim-lab/battleship/results.json in 455.9s
+  Random: mean 95.45 median 97.0 SD 4.77 CI +/-0.07
+  Hunt+Target: mean 66.36 median 66.0 SD 12.87 CI +/-0.18
+  Parity+Target: mean 61.34 median 62.0 SD 8.69 CI +/-0.12
+  Density-group-all: mean 45.17 median 45.0 SD 8.76 CI +/-0.12
